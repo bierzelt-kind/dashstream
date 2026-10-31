@@ -1,4 +1,4 @@
-# 🚗 DashStream – Die Anleitung für Dummies
+# 🚗 DashStream
 
 ![DashStream Vorschau](preview.svg)
 
