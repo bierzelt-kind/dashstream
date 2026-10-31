@@ -202,7 +202,92 @@ ightarrow$ Zeigt dir live, ob Tailscale gerade an oder aus ist.
 
 ---
 
-## 🖥️ Schritt 4: Vollbild im Auto & Geheimfunktionen
+
+
+---
+
+## 🔋 Schritt 4: Live-Ladestatus & Akkustand einbinden (mit TeslaMate)
+
+Damit oben in der Leiste von **DashStream** live dein **Akkustand (%)**, die **Reichweite (km)**, die **aktuelle Ladeleistung (kW)** und das **Ladelimit** angezeigt werden, nutzt DashStream die Daten von **[TeslaMate](https://docs.teslamate.org/)** (dem kostenlosen Open-Source-Logger auf deinem Heimserver).
+
+### Wie funktioniert der Trick?
+Der Browser im Auto darf aus Sicherheitsgründen (CORS) nicht direkt auf deine Datenbank zugreifen. Deshalb liest ein winziges Hintergrund-Skript auf deinem Server alle 10 Sekunden die aktuellen Fahrzeugdaten direkt aus deiner **TeslaMate-Datenbank** aus und legt sie als kleine Datei (`tesla_status.json`) in den Jellyfin-Ordner. DashStream liest diese Datei dann automatisch aus.
+
+### 1. Voraussetzung prüfen
+Auf deinem Server muss **TeslaMate** im Docker laufen. Prüfe kurz mit diesem Befehl, wie dein TeslaMate-Datenbank-Container heißt (meistens `teslamate-database-1` oder `db`):
+
+    docker ps --format "{{.Names}}" | grep -iE "teslamate|db|postgres"
+
+### 2. Das Live-Brücken-Skript anlegen
+Erstelle auf deinem Server die Datei `~/dashstream_teslamate.sh`:
+
+    cat << 'EOF' > ~/dashstream_teslamate.sh
+    #!/bin/bash
+    # Name deines TeslaMate-Datenbank-Containers & Jellyfin-Containers:
+    DB_CONTAINER=$(docker ps --format '{{.Names}}' | grep -iE 'teslamate.*db|teslamate.*database|postgres' | head -n 1)
+    JF_CONTAINER=$(docker ps --format '{{.Names}}' | grep -i 'jellyfin' | head -n 1)
+    DB_USER="teslamate"
+    DB_NAME="teslamate"
+
+    echo "Starte DashStream Live-Ladestatus-Bruecke ($DB_CONTAINER -> $JF_CONTAINER)..."
+
+    while true; do
+      JSON=$(docker exec "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -t -A -c "
+        SELECT row_to_json(t) FROM (
+          SELECT
+            p.battery_level,
+            ROUND(p.rated_battery_range_km) AS range_km,
+            COALESCE(p.speed, 0) AS speed,
+            COALESCE(c.charger_power, 0) AS charger_power,
+            COALESCE(c.charge_limit_soc, 80) AS charge_limit_soc,
+            COALESCE(c.time_to_full_charge, 0) AS time_to_full,
+            (SELECT state FROM states WHERE car_id = 1 ORDER BY start_date DESC LIMIT 1) AS state
+          FROM positions p
+          LEFT JOIN charging_processes cp ON cp.car_id = p.car_id AND cp.end_date IS NULL
+          LEFT JOIN charges c ON c.charging_process_id = cp.id
+          WHERE p.car_id = 1
+          ORDER BY p.date DESC
+          LIMIT 1
+        ) t;" 2>/dev/null)
+
+      if [ -n "$JSON" ]; then
+        echo "$JSON" > /tmp/tesla_status.json
+        docker cp /tmp/tesla_status.json "$JF_CONTAINER":/usr/share/jellyfin/web/tesla_status.json 2>/dev/null
+      fi
+      sleep 10
+    done
+    EOF
+    chmod +x ~/dashstream_teslamate.sh
+
+### 3. Als automatischen Hintergrund-Dienst starten
+Damit die Ladeanzeige immer von selbst mitläuft (auch nach einem Neustart des Servers), führe diesen Block einmalig im Terminal aus:
+
+    sudo bash -c "cat << EOF > /etc/systemd/system/dashstream-teslamate.service
+    [Unit]
+    Description=DashStream TeslaMate Live Status Bridge
+    After=docker.service
+    Requires=docker.service
+
+    [Service]
+    Type=simple
+    User=$USER
+    ExecStart=/bin/bash $HOME/dashstream_teslamate.sh
+    Restart=always
+    RestartSec=10
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF"
+
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now dashstream-teslamate.service
+
+**Fertig!** Sobald dein Auto lädt oder fährt, siehst du oben in DashStream live deinen Akkustand, die kW-Ladeleistung am Supercharger und die Restladezeit.
+
+
+---
+
+## 🖥️ Schritt 5: Vollbild im Auto & Geheimfunktionen
 
 * **Echtes Vollbild (während das Auto in „P“ parkt):**
   Tippe oben rechts im Dashboard auf den blauen Knopf **„Vollbild“**. Über den integrierten Weiterleitungs-Trick öffnet sich DashStream komplett ohne Browser-Leisten über den gesamten Bildschirm.
