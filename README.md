@@ -33,7 +33,7 @@ chmod +x install.sh
 Öffne deinen Browser und rufe diese Adresse auf (ersetze `192.168.1.100` durch die IP-Adresse deines Servers):
 
 ```text
-http://192.168.1.100:8096/web/tesla.html
+http://192.168.1.100:8096/web/dashstream.html
 ```
 
 Logge dich einmal mit deinem normalen Jellyfin-Namen und Passwort ein – fertig!
@@ -60,7 +60,7 @@ Damit du unterwegs am Ladepark oder auf Reisen auf deinen Server zuhause zugreif
 4. **Direkt im Auto-Browser öffnen:**
    Tailscale gibt dir eine eigene `https://`-Adresse (z. B. `https://mein-server.tail1234.ts.net`). Öffne im Browser im Auto einfach:
    ```text
-   https://mein-server.tail1234.ts.net/web/tesla.html
+   https://mein-server.tail1234.ts.net/web/dashstream.html
    ```
 
 ---
