@@ -38,9 +38,9 @@ Logge dich einmal mit deinem normalen Jellyfin-Namen und Passwort ein – fertig
 
 Damit du unterwegs am Supercharger oder auf Reisen auf deinen Server zuhause zugreifen kannst, solltest du **keine gefährlichen Portfreigaben** in deiner FritzBox einrichten. Nutze stattdessen **Tailscale** (kostenlos).
 
-Weil man im Tesla-Browser selbst keine VPN-App installieren kann, gibt es **zwei kinderleichte Wege**:
+Weil man im Tesla-Browser selbst keine VPN-App installieren kann, gibt es **ein kinderleichte Wege**:
 
-### Methode A: Direkt über das Tesla-LTE mit „Tailscale Funnel“ (Empfohlen)
+# Direkt über das Tesla-LTE mit „Tailscale Funnel“ (Empfohlen)
 Mit *Tailscale Funnel* bekommt dein Server zuhause eine eigene, verschlüsselte `https://`-Internetadresse, die du direkt im Tesla-Browser eintippen kannst – ganz ohne Handy-Hotspot:
 
 1. **Tailscale auf dem Server installieren** (falls noch nicht geschehen):
@@ -63,13 +63,6 @@ Mit *Tailscale Funnel* bekommt dein Server zuhause eine eigene, verschlüsselte 
    Tailscale zeigt dir im Terminal deine persönliche Adresse an (z. B. `https://mein-server.tail1234.ts.net`). Öffne im Tesla-Browser einfach:
 
        https://mein-server.tail1234.ts.net/web/tesla.html
-
-### Methode B: Ohne Funnel über die Tailscale-App auf dem Handy
-Wenn du kein Funnel einrichten willst:
-1. Installiere die kostenlose **Tailscale-App** auf deinem Smartphone und melde dich mit demselben Konto an wie auf deinem Server.
-2. Schalte Tailscale auf dem Handy ein. Du findest dort die `100.x.x.x`-IP-Adresse deines Servers.
-3. Rufe `http://100.x.x.x:8096/web/tesla.html` direkt auf dem Handy auf (und streame den Ton per Bluetooth ans Auto) oder gib die Verbindung per Handy-Hotspot an den Tesla weiter.
-
 ---
 
 ## 🖥️ Schritt 3: Echtes Vollbild im Tesla & Geheimfunktionen
