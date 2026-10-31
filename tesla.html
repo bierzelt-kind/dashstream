@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TESLA THEATER</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+  :root {
+    --bg: #090a0c;
+    --panel: #14161b;
+    --panel-light: #22262f;
+    --tesla-red: #e82127;
+    --tesla-blue: #3e6ae1;
+    --tesla-green: #22c55e;
+    --text: #f4f5f7;
+    --muted: #8b909a;
+    --border: rgba(255,255,255,0.08);
+    --spring: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+  body { background: var(--bg); color: var(--text); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  ::-webkit-scrollbar { display: none; }
+
+  @keyframes bootFadeOut {
+    0% { opacity: 1; visibility: visible; }
+    75% { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
+  }
+  @keyframes logoPulse {
+    0% { transform: scale(0.92); opacity: 0; letter-spacing: 14px; }
+    60% { transform: scale(1.02); opacity: 1; letter-spacing: 8px; }
+    100% { transform: scale(1); opacity: 1; letter-spacing: 8px; }
+  }
+  @keyframes kenBurns {
+    0% { transform: scale(1) translateZ(0); }
+    50% { transform: scale(1.07) translate(-1%, -1%) translateZ(0); }
+    100% { transform: scale(1) translateZ(0); }
+  }
+  @keyframes cardSlideUp {
+    from { opacity: 0; transform: translateY(24px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes energyShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes dotPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.35); opacity: 0.65; }
+  }
+  @keyframes dockSlideUp {
+    from { opacity: 0; transform: translate(-50%, 40px) scale(0.95); }
+    to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  }
+
+  #bootSplash {
+    position: fixed; inset: 0; background: #050608; z-index: 2000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+    pointer-events: none; animation: bootFadeOut 1.1s var(--spring) forwards;
+  }
+  .boot-word { font-size: 1.9rem; font-weight: 800; color: #fff; animation: logoPulse 0.8s var(--spring) forwards; }
+  .boot-sub { font-size: 0.78rem; color: var(--muted); letter-spacing: 4px; text-transform: uppercase; }
+
+  /* 100% ANIMIERTE LADELEISTE */
+  #batteryEdgeWrap {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+    pointer-events: none; transition: opacity 0.4s ease, transform 0.4s var(--spring);
+  }
+  #batteryEdgeWrap.hidden { opacity: 0; transform: translateY(-10px); }
+  .edge-track { width: 100vw; height: 6px; background: rgba(255,255,255,0.1); position: relative; }
+  .edge-fill {
+    height: 100%; width: 38%;
+    background: linear-gradient(90deg, #16a34a 0%, #4ade80 50%, #ffffff 55%, #22c55e 60%, #16a34a 100%);
+    background-size: 200% 100%;
+    animation: energyShimmer 3.5s infinite linear;
+    box-shadow: 0 0 16px rgba(34,197,94,0.9);
+    transition: width 0.8s var(--spring);
+  }
+  .edge-limit-tick {
+    position: absolute; top: 0; bottom: -5px; left: 80%; width: 3px;
+    background: #ffffff; box-shadow: 0 0 8px #ffffff; border-radius: 2px;
+    transition: left 0.5s var(--spring);
+  }
+  .edge-limit-lbl {
+    position: absolute; top: 9px; left: 80%; transform: translateX(-50%);
+    font-size: 0.66rem; font-weight: 800; color: #ffffff;
+    background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px;
+  }
+  .edge-info-pill {
+    position: absolute; top: 10px; left: 28px;
+    background: rgba(16, 18, 24, 0.9); border: 1px solid rgba(34,197,94,0.4);
+    padding: 5px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700;
+    color: #e2e8f0; display: flex; align-items: center; gap: 10px;
+    backdrop-filter: blur(10px);
+  }
+  .edge-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--tesla-green); box-shadow: 0 0 8px var(--tesla-green); animation: dotPulse 2s infinite ease-in-out; }
+
+  /* HEADER */
+  header {
+    position: fixed; top: 6px; left: 0; right: 0; height: 70px; z-index: 100;
+    background: rgba(9, 10, 12, 0.92); backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 28px; gap: 12px;
+  }
+  .t-brand { display: flex; align-items: center; gap: 12px; white-space: nowrap; cursor: pointer; transition: transform 0.2s var(--spring); }
+  .t-brand:active { transform: scale(0.94); }
+  .t-logo { font-size: 1rem; font-weight: 800; letter-spacing: 6px; color: #fff; transition: color 0.3s; }
+  .t-logo.override-on { color: var(--tesla-red); text-shadow: 0 0 12px rgba(232,33,39,0.7); }
+  .t-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.22); }
+  .t-sub { font-size: 0.76rem; font-weight: 700; letter-spacing: 2px; color: var(--muted); }
+
+  .t-tabs {
+    display: flex; background: var(--panel); padding: 4px; border-radius: 10px;
+    border: 1px solid var(--border); gap: 4px; overflow-x: auto;
+  }
+  .t-tab {
+    background: transparent; border: none; color: var(--muted);
+    padding: 8px 16px; border-radius: 7px; font-size: 0.88rem; font-weight: 600;
+    cursor: pointer; white-space: nowrap; transition: all 0.25s var(--spring);
+  }
+  .t-tab.active { background: var(--panel-light); color: #fff; transform: scale(1.02); box-shadow: 0 2px 10px rgba(0,0,0,0.35); }
+
+  .t-actions { display: flex; align-items: center; gap: 8px; }
+  .t-search {
+    background: var(--panel); border: 1px solid var(--border); color: #fff;
+    padding: 9px 14px; border-radius: 8px; font-size: 0.88rem; width: 145px; outline: none;
+    transition: width 0.3s var(--spring), border-color 0.2s;
+  }
+  .t-search:focus { width: 200px; border-color: rgba(255,255,255,0.35); }
+  .t-btn {
+    background: var(--panel); border: 1px solid var(--border); color: #fff;
+    padding: 9px 14px; border-radius: 8px; font-size: 0.84rem; font-weight: 600;
+    cursor: pointer; white-space: nowrap; transition: transform 0.18s var(--spring), background 0.2s, border-color 0.2s;
+  }
+  .t-btn:active { transform: scale(0.92); }
+  .t-btn.active-bar { border-color: rgba(34,197,94,0.55); color: #86efac; background: rgba(34,197,94,0.1); }
+  .t-btn.blue { background: var(--tesla-blue); border-color: var(--tesla-blue); font-weight: 700; }
+
+  /* DIREKT EINGEBETTETES AUDIOBOOKSHELF FENSTER */
+  #absEmbeddedView {
+    position: fixed; top: 76px; left: 0; right: 0; bottom: 0;
+    background: var(--bg); z-index: 80; display: none; flex-direction: column;
+    animation: cardSlideUp 0.35s var(--spring);
+  }
+  .abs-subbar {
+    height: 48px; background: var(--panel); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 28px;
+    font-size: 0.85rem; color: var(--muted);
+  }
+  #absIframe {
+    flex: 1; width: 100%; height: 100%; border: none; background: #111215;
+  }
+
+  /* KEN BURNS HERO */
+  #hero {
+    position: relative; height: 62vh; min-height: 430px; width: 100%;
+    overflow: hidden; display: flex; align-items: flex-end; padding: 44px 36px; margin-top: 20px;
+  }
+  #heroBg {
+    position: absolute; inset: 0; background-size: cover; background-position: center 20%;
+    animation: kenBurns 26s infinite ease-in-out; transition: background-image 0.6s ease-in-out;
+  }
+  #hero::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(0deg, var(--bg) 5%, rgba(9,10,12,0.76) 52%, rgba(9,10,12,0.22) 100%);
+  }
+  .hero-box { position: relative; z-index: 2; max-width: 760px; display: flex; flex-direction: column; gap: 12px; animation: cardSlideUp 0.6s var(--spring); }
+  .hero-tags { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .h-tag {
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.16);
+    padding: 4px 10px; border-radius: 5px; font-size: 0.76rem; font-weight: 600; backdrop-filter: blur(6px);
+  }
+  .hero-title { font-size: 3rem; font-weight: 800; line-height: 1.06; letter-spacing: -0.5px; text-shadow: 0 6px 24px rgba(0,0,0,0.8); }
+  .hero-desc { color: #cbd5e1; font-size: 0.98rem; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .hero-btns { display: flex; gap: 12px; margin-top: 6px; }
+  .btn-play { background: #fff; color: #000; border: none; padding: 13px 28px; border-radius: 8px; font-size: 0.96rem; font-weight: 700; cursor: pointer; transition: transform 0.2s var(--spring); }
+  .btn-play:active { transform: scale(0.95); }
+  .btn-sec { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.18); padding: 13px 20px; border-radius: 8px; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: transform 0.2s var(--spring); }
+  .btn-sec:active { transform: scale(0.95); }
+
+  /* MEDIA ROWS */
+  main { padding: 10px 36px 100px; position: relative; z-index: 5; }
+  .row { margin-bottom: 34px; animation: cardSlideUp 0.5s var(--spring) both; }
+  .row-title { font-size: 0.94rem; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; margin-bottom: 14px; color: var(--muted); }
+  .row-scroller { display: flex; gap: 16px; overflow-x: auto; padding: 6px 2px 14px; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+  .card {
+    flex: 0 0 185px; background: var(--panel); border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--border); cursor: pointer; position: relative;
+    transform: translateZ(0);
+    transition: transform 0.28s var(--spring), border-color 0.25s, box-shadow 0.28s;
+    animation: cardSlideUp 0.5s var(--spring) both;
+  }
+  .card.wide { flex: 0 0 300px; }
+  .card.square { flex: 0 0 195px; }
+  .card:hover { transform: translateY(-5px) scale(1.02); border-color: rgba(255,255,255,0.35); box-shadow: 0 14px 30px rgba(0,0,0,0.65); }
+  .card:active { transform: scale(0.95); border-color: #fff; }
+  .card img { width: 100%; height: 270px; object-fit: cover; display: block; background: #121418; transition: transform 0.4s var(--spring); }
+  .card:hover img { transform: scale(1.04); }
+  .card.wide img { height: 168px; }
+  .card.square img { height: 195px; }
+  .card-badge {
+    position: absolute; top: 8px; right: 8px; background: rgba(9,10,12,0.85);
+    padding: 3px 8px; border-radius: 5px; font-size: 0.72rem; font-weight: 600; backdrop-filter: blur(4px);
+  }
+  .card-info { padding: 11px 12px; position: relative; background: var(--panel); }
+  .card-title { font-size: 0.92rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-sub { font-size: 0.78rem; color: var(--muted); margin-top: 3px; display: flex; justify-content: space-between; }
+  .progress-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.14); }
+  .progress-fill { height: 100%; background: var(--tesla-red); }
+
+  /* TESLA HÖRBUCH MINI-DOCK */
+  #teslaAudioDock {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    width: 92%; max-width: 780px; height: 84px; z-index: 350;
+    background: rgba(20, 22, 28, 0.96); border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 16px; padding: 12px 20px; display: none; align-items: center;
+    justify-content: space-between; gap: 18px; box-shadow: 0 20px 50px rgba(0,0,0,0.85);
+    backdrop-filter: blur(20px); animation: dockSlideUp 0.4s var(--spring) forwards;
+  }
+  .ad-left { display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1; }
+  .ad-cover { width: 58px; height: 58px; border-radius: 10px; object-fit: cover; background: #111; flex-shrink: 0; }
+  .ad-meta { min-width: 0; flex: 1; }
+  .ad-title { font-size: 0.98rem; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ad-sub { font-size: 0.8rem; color: var(--tesla-green); margin-top: 3px; font-weight: 600; }
+  .ad-ctrls { display: flex; align-items: center; gap: 10px; }
+  .ad-btn {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.16); color: #fff;
+    height: 44px; padding: 0 14px; border-radius: 9px; font-weight: 700; font-size: 0.9rem; cursor: pointer;
+  }
+  .ad-btn.play { background: #fff; color: #000; min-width: 54px; font-size: 1.05rem; }
+
+  /* MODALS & OVERLAYS */
+  #loginScreen { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; }
+  .login-box { background: var(--panel); border: 1px solid var(--border); padding: 38px; border-radius: 14px; width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 14px; animation: cardSlideUp 0.4s var(--spring); }
+  .login-box input { background: var(--bg); border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 8px; font-size: 0.98rem; outline: none; }
+  .user-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  #seriesModal { position: fixed; inset: 0; background: rgba(9,10,12,0.96); backdrop-filter: blur(18px); z-index: 300; display: none; flex-direction: column; padding: 36px; overflow-y: auto; animation: cardSlideUp 0.35s var(--spring); }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .ep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; }
+
+  #teslaFunOverlay { position: fixed; inset: 0; background: #000; z-index: 850; display: none; flex-direction: column; align-items: center; justify-content: center; animation: cardSlideUp 0.35s var(--spring); }
+
+  /* VIDEO PLAYER & DRIVE SAFETY */
+  #playerOverlay { position: fixed; inset: 0; background: #000; z-index: 400; display: none; flex-direction: column; justify-content: space-between; overflow: hidden; }
+  video#videoEl { width: 100%; height: 100%; object-fit: contain; transition: transform 0.35s var(--spring); }
+  .zoom-half { transform: scale(1.14); }
+  .zoom-full { object-fit: cover; }
+
+  #driveSafetyShield {
+    position: absolute; inset: 0; background: #08090b; z-index: 405;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 32px; gap: 14px;
+  }
+  .shield-icon { font-size: 3.2rem; animation: dotPulse 2.4s infinite ease-in-out; }
+  .shield-title { font-size: 1.4rem; font-weight: 700; color: #fff; }
+  .shield-sub { font-size: 0.95rem; color: var(--muted); max-width: 480px; line-height: 1.45; }
+
+  .osd-top, .osd-bottom { position: absolute; left: 0; right: 0; padding: 26px 36px; z-index: 410; transition: opacity 0.3s ease, transform 0.3s var(--spring); }
+  .osd-top { top: 6px; background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .osd-bottom { bottom: 0; background: linear-gradient(0deg, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.6) 70%, transparent 100%); display: flex; flex-direction: column; gap: 14px; }
+  .osd-hidden .osd-top { opacity: 0; transform: translateY(-16px); pointer-events: none; }
+  .osd-hidden .osd-bottom { opacity: 0; transform: translateY(16px); pointer-events: none; }
+  .player-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .ctrl-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .btn-ctrl { background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.2); color: #fff; min-height: 46px; padding: 0 16px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: transform 0.15s var(--spring), background 0.2s; }
+  .btn-ctrl:active { transform: scale(0.93); }
+  .btn-ctrl.active-mode { background: #fff; color: #000; }
+  .btn-ctrl.play { background: #fff; color: #000; min-width: 80px; font-size: 1.1rem; font-weight: 700; }
+  .timeline-wrap { display: flex; align-items: center; gap: 16px; }
+  .time-lbl { font-size: 0.95rem; font-weight: 600; min-width: 62px; text-align: center; }
+  input[type=range] { flex: 1; -webkit-appearance: none; background: rgba(255,255,255,0.25); height: 7px; border-radius: 4px; outline: none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--tesla-red); border: 2px solid #fff; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="bootSplash">
+  <div class="boot-word">TESLA</div>
+  <div class="boot-sub">THEATER OS</div>
+</div>
+
+<div id="batteryEdgeWrap">
+  <div class="edge-track">
+    <div class="edge-fill" id="edgeBatFill" style="width: 38%;"></div>
+    <div class="edge-limit-tick" id="edgeLimitTick" style="left: 80%;"></div>
+    <div class="edge-limit-lbl" id="edgeLimitLbl" style="left: 80%;">LIMIT 80%</div>
+  </div>
+  <div class="edge-info-pill">
+    <div class="edge-dot"></div>
+    <span id="edgeSocTxt">🔋 38% (165 km)</span>
+    <span>•</span>
+    <span id="edgeTimeTxt">⚡ Ladedauer bis 80%: ca. 18 Min.</span>
+  </div>
+</div>
+
+<header>
+  <div class="t-brand" onclick="handleSecretLogoTap()" title="Tesla Theater">
+    <div class="t-logo" id="teslaLogoTxt">TESLA</div>
+    <div class="t-sep"></div>
+    <div class="t-sub" id="teslaSubTxt">THEATER</div>
+  </div>
+
+  <div class="t-tabs">
+    <button class="t-tab active" onclick="switchView('home', this)">Startseite</button>
+    <button class="t-tab" onclick="openEmbeddedAudiobookshelf(this)">🎧 Hörbücher</button>
+    <button class="t-tab" onclick="switchView('movies', this)">Filme</button>
+    <button class="t-tab" onclick="switchView('series', this)">Serien</button>
+    <button class="t-tab" onclick="switchView('short', this)">Kurz (&lt;30m)</button>
+    <button class="t-tab" onclick="switchView('kids', this)">Kids</button>
+  </div>
+
+  <div class="t-actions">
+    <input type="text" class="t-search" placeholder="Suchen..." oninput="searchItems(this.value)">
+    
+    <button class="t-btn active-bar" id="barToggleBtn" onclick="toggleBatteryBar()">🔋 Ladeleiste</button>
+    <button class="t-btn" onclick="spinRoulette()" title="Zufallsfilm">🎲</button>
+    <button class="t-btn blue" onclick="launchTeslaFullscreen()">Vollbild</button>
+  </div>
+</header>
+
+<!-- DIREKT EINGEBETTETES AUDIOBOOKSHELF IM TESLA-THEATER -->
+<div id="absEmbeddedView">
+  <div class="abs-subbar">
+    <span>🎧 <b>Audiobookshelf</b> direkt im Tesla-Theater integriert (Fahrmodus-tauglich)</span>
+    <div style="display:flex;gap:10px;">
+      <button class="t-btn" style="padding:5px 12px;font-size:0.78rem;" onclick="showNativeAudioFallback()">🎛️ Zur internen Hörspiel-Ansicht wechseln</button>
+      <button class="t-btn" style="padding:5px 12px;font-size:0.78rem;" onclick="reloadAbsFrame()">🔄 Neu laden</button>
+    </div>
+  </div>
+  <iframe id="absIframe" allow="autoplay; fullscreen"></iframe>
+</div>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="t-logo" style="font-size:1.1rem;">TESLA THEATER</div>
+    <p style="color:var(--muted); font-size:0.9rem;">Profil wählen:</p>
+    <div class="user-chips" id="userList"></div>
+    <input type="text" id="userInp" placeholder="Benutzername" autocapitalize="none">
+    <input type="password" id="passInp" placeholder="Passwort">
+    <button class="btn-play" onclick="doLogin()">Anmelden</button>
+    <div id="loginErr" style="color:var(--tesla-red); font-weight:600;"></div>
+  </div>
+</div>
+
+<section id="hero">
+  <div id="heroBg"></div>
+  <div class="hero-box">
+    <div class="hero-tags" id="heroBadges"></div>
+    <h1 class="hero-title" id="heroTitle">Lade Mediathek...</h1>
+    <p class="hero-desc" id="heroDesc"></p>
+    <div class="hero-btns">
+      <button class="btn-play" id="heroPlayBtn">▶ Abspielen</button>
+      <button class="btn-sec" onclick="spinRoulette()">🎲 Zufallsauswahl</button>
+    </div>
+  </div>
+</section>
+
+<main id="mainContent"></main>
+
+<div id="teslaAudioDock">
+  <div class="ad-left">
+    <img id="adCover" class="ad-cover" src="">
+    <div class="ad-meta">
+      <div class="ad-title" id="adTitle">Hörspiel</div>
+      <div class="ad-sub" id="adTime">0:00 / 0:00 • 🎧 Fahrmodus-Audio aktiv</div>
+    </div>
+  </div>
+  <div class="ad-ctrls">
+    <button class="ad-btn" onclick="skipAudio(-15)">-15s</button>
+    <button class="ad-btn play" id="adPlayBtn" onclick="toggleAudioDock()">⏸</button>
+    <button class="ad-btn" onclick="skipAudio(30)">+30s</button>
+    <button class="ad-btn" onclick="closeAudioDock()">✕</button>
+  </div>
+  <audio id="teslaAudioEl" style="display:none;"></audio>
+</div>
+
+<div id="seriesModal">
+  <div class="modal-header">
+    <h2 id="modalTitle" style="font-size:1.7rem; font-weight:700;">Episoden</h2>
+    <button class="btn-play" onclick="closeModal()">Schließen</button>
+  </div>
+  <div class="ep-grid" id="epGrid"></div>
+</div>
+
+<div id="playerOverlay" onclick="handlePlayerTap()">
+  <div id="driveSafetyShield">
+    <div class="shield-icon">🎧</div>
+    <div class="shield-title">Fahrmodus aktiv – Nur Audio-Wiedergabe</div>
+    <div class="shield-sub">Aus Sicherheitsgründen (StVO) ist das Videobild während der Fahrt ausgeblendet. Sobald das Fahrzeug parkt, erscheint das Bild automatisch wieder.</div>
+  </div>
+
+  <div class="osd-top" onclick="event.stopPropagation()">
+    <div>
+      <h2 id="playerTitle" style="font-size:1.25rem; font-weight:600;">Titel</h2>
+      <div id="osdMetaClock" style="color:var(--muted); font-size:0.86rem; font-weight:600; margin-top:3px;"></div>
+    </div>
+    <div class="ctrl-group">
+      <button class="btn-ctrl" id="audioTrackBtn" onclick="cycleAudioTrack()">🌐 Ton: Standard</button>
+      <button class="btn-ctrl" id="subTrackBtn" onclick="cycleSubtitles()">💬 UT: Aus</button>
+      <button class="btn-ctrl active-mode" id="playerBarBtn" onclick="toggleBatteryBar()">🔋 Ladeleiste</button>
+      <button class="btn-ctrl" id="zoomBtn" onclick="cycleZoom()">Format: Original</button>
+      <button class="btn-ctrl" id="dspBtn" onclick="cycleDsp()">Audio: Studio</button>
+      <button class="btn-ctrl" id="qualBtn" onclick="cycleQuality()">📶 Quali: Max</button>
+      <button class="btn-ctrl" id="transcodeBtn" onclick="toggleTranscode()">Ton-Fix (AAC)</button>
+      <button class="btn-ctrl" onclick="requestNativeFullscreen()">Vollbild</button>
+      <button class="btn-ctrl" onclick="closePlayer()">✕</button>
+    </div>
+  </div>
+
+  <video id="videoEl" crossorigin="anonymous" playsinline></video>
+
+  <div class="osd-bottom" onclick="event.stopPropagation()">
+    <div class="timeline-wrap">
+      <span class="time-lbl" id="curTime">0:00</span>
+      <input type="range" id="seekSlider" min="0" max="100" value="0" oninput="previewSeek(this.value)" onchange="seekVideo(this.value)">
+      <span class="time-lbl" id="remTime">-0:00</span>
+    </div>
+    <div class="player-controls">
+      <div class="ctrl-group">
+        <button class="btn-ctrl" onclick="skip(-15)">-15s</button>
+        <button class="btn-ctrl play" id="playPauseBtn" onclick="togglePlay()">⏸</button>
+        <button class="btn-ctrl" onclick="skip(30)">+30s</button>
+        <button class="btn-ctrl" onclick="skip(85)">Intro (+85s)</button>
+        <button class="btn-ctrl" onclick="skip(300)">+5 Min ⏭️</button>
+      </div>
+      <div id="streamModeBadge" style="color:var(--muted); font-weight:600; font-size:0.82rem; letter-spacing:1px;">DIRECT STREAM</div>
+    </div>
+  </div>
+</div>
+
+<script>
+var API_BASE = window.location.origin;
+var ABS_LOCAL_PORT = "13379";
+var token = localStorage.getItem('jf_token');
+var userId = localStorage.getItem('jf_user');
+var allMoviesPool = [];
+var currentItem = null;
+var isTranscoding = false;
+var hls = null;
+var osdTimer = null;
+var progressInterval = null;
+var transcodeOffset = 0;
+var zoomLevel = 0;
+var showBatBar = localStorage.getItem('tesla_bat_bar') !== 'off';
+var currentSubIndex = -1;
+var currentAudioIndex = -1;
+var availableSubStreams = [];
+
+var secretOverride = false;
+var logoTapCount = 0;
+var logoTapTimer = null;
+var currentSpeedKmh = 0;
+var campFireAnim = null;
+
+function getAbsUrl() {
+  if (window.location.hostname.indexOf('ts.net') > -1) {
+    return 'https://' + window.location.hostname + ':8444';
+  }
+  return 'http://' + window.location.hostname + ':' + ABS_LOCAL_PORT;
+}
+
+function openEmbeddedAudiobookshelf(btn) {
+  document.querySelectorAll('.t-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const frame = document.getElementById('absIframe');
+  const targetUrl = getAbsUrl();
+  if (frame.src.indexOf(targetUrl) === -1) {
+    frame.src = targetUrl;
+  }
+  document.getElementById('absEmbeddedView').style.display = 'flex';
+}
+
+function reloadAbsFrame() {
+  document.getElementById('absIframe').src = getAbsUrl();
+}
+
+async function showNativeAudioFallback() {
+  document.getElementById('absEmbeddedView').style.display = 'none';
+  document.getElementById('hero').style.display = 'none';
+  const main = document.getElementById('mainContent');
+  main.innerHTML = '<div style="height:85px;"></div>';
+
+  const absBanner = document.createElement('div');
+  absBanner.style.cssText = 'background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 24px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;';
+  absBanner.innerHTML = '<div><div style="font-weight:700;font-size:1.05rem;">🎛️ Interne Hörspiel-Ansicht (Tesla Mini-Dock)</div><div style="color:var(--muted);font-size:0.86rem;margin-top:3px;">Spielt Hörspiele und Kinder-Folgen direkt im unteren Tesla-Dock ab.</div></div><button class="t-btn blue" onclick="openEmbeddedAudiobookshelf(document.querySelectorAll(\'.t-tab\')[1])">📱 Zurück zur eingebetteten Audiobookshelf-App</button>';
+  main.appendChild(absBanner);
+
+  try {
+    const [audioRes, kidsEpRes] = await Promise.all([
+      api('/Users/' + userId + '/Items?IncludeItemTypes=Audio,AudioBook,MusicAlbum,Book&Recursive=true&Limit=40&SortBy=SortName'),
+      api('/Users/' + userId + '/Items?IncludeItemTypes=Episode,Movie&Recursive=true&Genres=Animation,Family,Kids,Familie,Kinder&Limit=30&SortBy=Random')
+    ]);
+    if (audioRes.Items && audioRes.Items.length > 0) renderRow('🎧 Hörbücher & Alben', audioRes.Items, 'square');
+    if (kidsEpRes.Items && kidsEpRes.Items.length > 0) renderRow('🦁 Kinder-Hörspiele (Nur-Ton-Modus)', kidsEpRes.Items, 'square');
+  } catch (e) {}
+}
+
+function handleSecretLogoTap() {
+  logoTapCount++;
+  clearTimeout(logoTapTimer);
+  logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 1800);
+  if (logoTapCount >= 5) {
+    logoTapCount = 0;
+    secretOverride = secretOverride === false;
+    document.getElementById('teslaLogoTxt').classList.toggle('override-on', secretOverride);
+    document.getElementById('teslaSubTxt').innerText = secretOverride ? 'CO-PILOT UNLOCKED' : 'THEATER';
+    evaluateDriveSafety();
+  }
+}
+
+function evaluateDriveSafety() {
+  const shield = document.getElementById('driveSafetyShield');
+  if (currentSpeedKmh > 3 && secretOverride === false) {
+    shield.style.display = 'flex';
+  } else {
+    shield.style.display = 'none';
+  }
+}
+
+function handlePlayerTap() {
+  if (secretOverride && currentSpeedKmh > 3) {
+    secretOverride = false;
+    document.getElementById('teslaLogoTxt').classList.remove('override-on');
+    document.getElementById('teslaSubTxt').innerText = 'THEATER';
+    closePlayer();
+    return;
+  }
+  wakeOsd();
+}
+
+if ('mediaSession' in navigator) {
+  navigator.mediaSession.setActionHandler('pause', () => {
+    if (secretOverride) {
+      secretOverride = false;
+      document.getElementById('teslaLogoTxt').classList.remove('override-on');
+      document.getElementById('teslaSubTxt').innerText = 'THEATER';
+      closePlayer();
+    } else {
+      togglePlay();
+    }
+  });
+}
+
+if (navigator.geolocation) {
+  navigator.geolocation.watchPosition(pos => {
+    if (pos.coords && pos.coords.speed !== null) {
+      currentSpeedKmh = Math.round(pos.coords.speed * 3.6);
+      evaluateDriveSafety();
+    }
+  }, () => {}, { enableHighAccuracy: true });
+}
+
+var audioCtx = null;
+var bassFilter = null;
+var voiceFilter = null;
+var gainNode = null;
+var dspMode = 0;
+
+if (Boolean(token) === false || Boolean(userId) === false) {
+  try {
+    const raw = localStorage.getItem('jellyfin_credentials');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.Servers && parsed.Servers.length > 0 && parsed.Servers[0].AccessToken) {
+        token = parsed.Servers[0].AccessToken;
+        userId = parsed.Servers[0].UserId;
+        localStorage.setItem('jf_token', token);
+        localStorage.setItem('jf_user', userId);
+      }
+    }
+  } catch (e) {}
+}
+
+function applyBatteryBarState() {
+  const wrap = document.getElementById('batteryEdgeWrap');
+  wrap.classList.toggle('hidden', showBatBar === false);
+  document.getElementById('barToggleBtn').classList.toggle('active-bar', showBatBar);
+  document.getElementById('playerBarBtn').classList.toggle('active-mode', showBatBar);
+}
+applyBatteryBarState();
+
+function toggleBatteryBar() {
+  showBatBar = showBatBar === false;
+  localStorage.setItem('tesla_bat_bar', showBatBar ? 'on' : 'off');
+  applyBatteryBarState();
+}
+
+async function pollBatteryBar() {
+  try {
+    const r = await fetch(API_BASE + '/web/tesla_live.json?t=' + Date.now());
+    if (r.ok) {
+      const d = await r.json();
+      if (d && d.live) {
+        currentSpeedKmh = d.speed || 0;
+        evaluateDriveSafety();
+        const soc = Math.max(0, Math.min(100, d.soc || 0));
+        const limit = Math.max(50, Math.min(100, d.limit_soc || 80));
+        document.getElementById('edgeBatFill').style.width = soc + '%';
+        document.getElementById('edgeLimitTick').style.left = limit + '%';
+        document.getElementById('edgeLimitLbl').style.left = limit + '%';
+        document.getElementById('edgeLimitLbl').innerText = 'LIMIT ' + limit + '%';
+        document.getElementById('edgeSocTxt').innerText = '🔋 ' + soc + '% (' + (d.range_km || 0) + ' km)';
+        if (d.kw > 0) {
+          document.getElementById('edgeTimeTxt').innerText = '⚡ ' + d.kw + ' kW (+' + (d.added_kwh || 0) + ' kWh) • Noch ' + (d.eta_min || 0) + ' Min. bis ' + limit + '%';
+        } else {
+          document.getElementById('edgeTimeTxt').innerText = 'Ladelimit bei ' + limit + '% • Fahrzeug bereit';
+        }
+        return;
+      }
+    }
+  } catch (e) {}
+}
+setInterval(pollBatteryBar, 4000);
+pollBatteryBar();
+
+function initAudioEngine() {
+  if (audioCtx) return;
+  try {
+    const v = document.getElementById('videoEl');
+    const AC = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AC();
+    const src = audioCtx.createMediaElementSource(v);
+    bassFilter = audioCtx.createBiquadFilter(); bassFilter.type = 'lowshelf'; bassFilter.frequency.value = 65; bassFilter.gain.value = 0;
+    voiceFilter = audioCtx.createBiquadFilter(); voiceFilter.type = 'peaking'; voiceFilter.frequency.value = 2400; voiceFilter.Q.value = 1.0; voiceFilter.gain.value = 0;
+    gainNode = audioCtx.createGain(); gainNode.gain.value = 1.0;
+    src.connect(bassFilter); bassFilter.connect(voiceFilter); voiceFilter.connect(gainNode); gainNode.connect(audioCtx.destination);
+  } catch (e) {}
+}
+
+function cycleDsp() {
+  initAudioEngine();
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  dspMode = (dspMode + 1) % 3;
+  const btn = document.getElementById('dspBtn');
+  if (dspMode === 0) {
+    if (bassFilter) bassFilter.gain.value = 0;
+    if (voiceFilter) voiceFilter.gain.value = 0;
+    if (gainNode) gainNode.gain.value = 1.0;
+    btn.innerText = 'Audio: Studio'; btn.classList.remove('active-mode');
+  } else if (dspMode === 1) {
+    if (bassFilter) bassFilter.gain.value = 0;
+    if (voiceFilter) voiceFilter.gain.value = 7;
+    if (gainNode) gainNode.gain.value = 1.8;
+    btn.innerText = 'Audio: Sprachfokus'; btn.classList.add('active-mode');
+  } else {
+    if (bassFilter) bassFilter.gain.value = 8;
+    if (voiceFilter) voiceFilter.gain.value = 3;
+    if (gainNode) gainNode.gain.value = 1.5;
+    btn.innerText = 'Audio: Subwoofer+'; btn.classList.add('active-mode');
+  }
+}
+
+async function cycleSubtitles() {
+  if (currentItem == null) return;
+  try {
+    const fullItem = await api('/Users/' + userId + '/Items/' + currentItem.Id);
+    availableSubStreams = (fullItem.MediaStreams || []).filter(s => s.Type === 'Subtitle');
+    if (availableSubStreams.length === 0) {
+      document.getElementById('subTrackBtn').innerText = '💬 Keine UT';
+      return;
+    }
+    const curPos = availableSubStreams.findIndex(s => s.Index === currentSubIndex);
+    if (curPos + 1 < availableSubStreams.length) {
+      const nextSub = availableSubStreams[curPos + 1];
+      currentSubIndex = nextSub.Index;
+      const lang = (nextSub.Language || 'UT').toUpperCase();
+      document.getElementById('subTrackBtn').innerText = '💬 UT: ' + lang;
+      document.getElementById('subTrackBtn').classList.add('active-mode');
+    } else {
+      currentSubIndex = -1;
+      document.getElementById('subTrackBtn').innerText = '💬 UT: Aus';
+      document.getElementById('subTrackBtn').classList.remove('active-mode');
+    }
+    startPlayback(currentItem, true, Math.floor(getActualTime()));
+  } catch (e) {}
+}
+
+function getFinishTimeString(secondsLeft) {
+  const end = new Date(Date.now() + secondsLeft * 1000);
+  return 'Endet um ' + String(end.getHours()).padStart(2, '0') + ':' + String(end.getMinutes()).padStart(2, '0') + ' Uhr';
+}
+
+function authHeader() {
+  return 'MediaBrowser Client="TeslaMasterV18", Device="TeslaModelY", DeviceId="tesla-master-18", Version="18.0.0"' + (token ? ', Token="' + token + '"' : '');
+}
+
+async function api(path, opts = {}, isAuthCall = false) {
+  const h = { 'Authorization': authHeader(), 'X-Emby-Authorization': authHeader(), 'Content-Type': 'application/json' };
+  opts.headers = Object.assign(h, opts.headers || {});
+  const res = await fetch(API_BASE + path, opts);
+  if (res.status === 401) {
+    if (isAuthCall === false) logout();
+    throw new Error('Unauthorized');
+  }
+  return res.status === 204 ? null : res.json();
+}
+
+async function showLoginScreen() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  try {
+    const users = await api('/Users/Public', {}, true);
+    if (users && users.length > 0) {
+      document.getElementById('userInp').value = users[0].Name;
+      const list = document.getElementById('userList');
+      list.innerHTML = '';
+      users.forEach(u => {
+        const b = document.createElement('button');
+        b.className = 't-btn';
+        b.innerText = u.Name;
+        b.onclick = () => { document.getElementById('userInp').value = u.Name; };
+        list.appendChild(b);
+      });
+    }
+  } catch (e) {}
+}
+
+async function doLogin() {
+  const u = document.getElementById('userInp').value.trim();
+  const p = document.getElementById('passInp').value;
+  try {
+    const data = await api('/Users/AuthenticateByName', { method: 'POST', body: JSON.stringify({ Username: u, Pw: p }) }, true);
+    token = data.AccessToken; userId = data.User.Id;
+    localStorage.setItem('jf_token', token); localStorage.setItem('jf_user', userId);
+    document.getElementById('loginScreen').style.display = 'none';
+    loadHome();
+  } catch (e) {
+    document.getElementById('loginErr').innerText = 'Anmeldung fehlgeschlagen.';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('jf_token'); localStorage.removeItem('jf_user');
+  showLoginScreen();
+}
+
+function launchTeslaFullscreen() {
+  window.location.href = 'https://www.youtube.com/redirect?q=' + encodeURIComponent(window.location.href);
+}
+
+function requestNativeFullscreen() {
+  const el = document.documentElement;
+  if (el.requestFullscreen) el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  else launchTeslaFullscreen();
+}
+
+async function loadHome() {
+  if (Boolean(token) === false || Boolean(userId) === false) { showLoginScreen(); return; }
+  document.getElementById('absEmbeddedView').style.display = 'none';
+  document.getElementById('hero').style.display = 'flex';
+  try {
+    const [resume, latest, movies, series] = await Promise.all([
+      api('/Users/' + userId + '/Items/Resume?Limit=12&Recursive=true&Fields=Overview&MediaTypes=Video'),
+      api('/Users/' + userId + '/Items/Latest?Limit=16&Fields=Overview&IncludeItemTypes=Movie,Series'),
+      api('/Users/' + userId + '/Items?IncludeItemTypes=Movie&Recursive=true&SortBy=DateCreated&SortOrder=Descending&Limit=35&Fields=Overview'),
+      api('/Users/' + userId + '/Items?IncludeItemTypes=Series&Recursive=true&SortBy=DateCreated&SortOrder=Descending&Limit=30&Fields=Overview')
+    ]);
+
+    allMoviesPool = (movies.Items || []).concat(latest || []);
+    if (allMoviesPool.length) setHero(allMoviesPool[Math.floor(Math.random() * Math.min(8, allMoviesPool.length))]);
+
+    const main = document.getElementById('mainContent');
+    main.innerHTML = '';
+    if (resume.Items && resume.Items.length) renderRow('Weiterschauen', resume.Items, 'wide');
+    if (latest && latest.length) renderRow('Neu hinzugefügt', latest, 'poster');
+    if (movies.Items && movies.Items.length) renderRow('Filme', movies.Items, 'poster');
+    if (series.Items && series.Items.length) renderRow('Serien', series.Items, 'poster');
+  } catch (e) { localStorage.clear(); showLoginScreen(); }
+}
+
+function setHero(item) {
+  const bg = API_BASE + '/Items/' + item.Id + '/Images/Backdrop/0?maxWidth=1600&quality=80';
+  document.getElementById('heroBg').style.backgroundImage = 'url(' + bg + ')';
+  document.getElementById('heroTitle').innerText = item.Name;
+  document.getElementById('heroDesc').innerText = item.Overview || '';
+  const mins = item.RunTimeTicks ? Math.round(item.RunTimeTicks / 600000000) : 0;
+  const badges = document.getElementById('heroBadges');
+  badges.innerHTML = '';
+  if (item.ProductionYear) badges.innerHTML += '<span class="h-tag">' + item.ProductionYear + '</span>';
+  if (item.OfficialRating) badges.innerHTML += '<span class="h-tag">' + item.OfficialRating + '</span>';
+  if (mins > 0) {
+    badges.innerHTML += '<span class="h-tag">' + mins + ' Min.</span>';
+    badges.innerHTML += '<span class="h-tag">' + getFinishTimeString(mins * 60) + '</span>';
+  }
+  document.getElementById('heroPlayBtn').onclick = () => openItem(item);
+}
+
+function spinRoulette() {
+  if (allMoviesPool.length === 0) return;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const pick = allMoviesPool[Math.floor(Math.random() * allMoviesPool.length)];
+  setHero(pick);
+}
+
+function renderRow(title, items, mode) {
+  const sec = document.createElement('div');
+  sec.className = 'row';
+  sec.innerHTML = '<div class="row-title">' + title + '</div>';
+  const scroller = document.createElement('div');
+  scroller.className = 'row-scroller';
+
+  items.forEach((item, index) => {
+    const card = document.createElement('div');
+    const isWide = mode === 'wide';
+    const isSquare = mode === 'square';
+    card.className = 'card' + (isWide ? ' wide' : '') + (isSquare ? ' square' : '');
+    card.style.animationDelay = Math.min(index * 45, 500) + 'ms';
+
+    const imgType = isWide ? 'Backdrop' : 'Primary';
+    const imgId = (isWide && item.ParentBackdropItemId) ? item.ParentBackdropItemId : item.Id;
+    const imgUrl = API_BASE + '/Items/' + imgId + '/Images/' + imgType + '?maxWidth=480&quality=78';
+    const pct = item.UserData && item.UserData.PlayedPercentage ? Math.round(item.UserData.PlayedPercentage) : 0;
+    const mins = item.RunTimeTicks ? Math.round(item.RunTimeTicks / 600000000) : 0;
+
+    card.innerHTML = '<img src="' + imgUrl + '" onerror="this.src=\'' + API_BASE + '/Items/' + item.Id + '/Images/Primary?maxWidth=360\'" loading="lazy" decoding="async">' +
+      (mins > 0 ? '<div class="card-badge">' + mins + ' Min.</div>' : '') +
+      '<div class="card-info"><div class="card-title">' + (item.SeriesName ? item.SeriesName + ' - ' + item.Name : item.Name) + '</div>' +
+      '<div class="card-sub"><span>' + (isSquare ? '🎧 Audio-Stream' : (item.ProductionYear || '')) + '</span><span>' + (pct > 0 ? pct + '%' : '') + '</span></div></div>' +
+      (pct > 0 ? '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' : '');
+
+    card.onclick = () => {
+      if (isSquare) startAudioDock(item);
+      else openItem(item);
+    };
+    scroller.appendChild(card);
+  });
+  sec.appendChild(scroller);
+  document.getElementById('mainContent').appendChild(sec);
+}
+
+async function switchView(view, btn) {
+  document.querySelectorAll('.t-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('absEmbeddedView').style.display = 'none';
+  if (view === 'home') return loadHome();
+  document.getElementById('hero').style.display = 'flex';
+  document.getElementById('mainContent').innerHTML = '';
+
+  if (view === 'short') {
+    const res = await api('/Users/' + userId + '/Items?IncludeItemTypes=Episode,Movie&Recursive=true&MaxRunTimeTicks=21000000000&Limit=30&SortBy=Random&Fields=Overview');
+    renderRow('Kurze Episoden & Filme unter 35 Minuten', res.Items, 'wide');
+    return;
+  }
+  if (view === 'kids') {
+    const res = await api('/Users/' + userId + '/Items?IncludeItemTypes=Movie,Series&Recursive=true&Genres=Animation,Family,Kids,Familie,Kinder&SortBy=SortName&Fields=Overview');
+    renderRow('Kids & Familie', res.Items, 'poster');
+    return;
+  }
+  const type = view === 'movies' ? 'Movie' : 'Series';
+  const res = await api('/Users/' + userId + '/Items?IncludeItemTypes=' + type + '&Recursive=true&SortBy=SortName&SortOrder=Ascending&Fields=Overview');
+  renderRow(view === 'movies' ? 'Alle Filme' : 'Alle Serien', res.Items, 'poster');
+}
+
+function startAudioDock(item) {
+  const a = document.getElementById('teslaAudioEl');
+  document.getElementById('adCover').src = API_BASE + '/Items/' + item.Id + '/Images/Primary?maxWidth=200';
+  document.getElementById('adTitle').innerText = item.SeriesName ? (item.SeriesName + ' - ' + item.Name) : item.Name;
+  document.getElementById('teslaAudioDock').style.display = 'flex';
+  a.src = API_BASE + '/Videos/' + item.Id + '/stream?Static=true&api_key=' + token;
+  a.play().catch(() => {
+    a.src = API_BASE + '/Audio/' + item.Id + '/universal?UserId=' + userId + '&DeviceId=tesla-audio&MaxStreamingBitrate=192000&Container=mp3,aac&api_key=' + token;
+    a.play();
+  });
+  document.getElementById('adPlayBtn').innerText = '⏸';
+}
+
+function toggleAudioDock() {
+  const a = document.getElementById('teslaAudioEl');
+  if (a.paused) { a.play(); document.getElementById('adPlayBtn').innerText = '⏸'; }
+  else { a.pause(); document.getElementById('adPlayBtn').innerText = '▶'; }
+}
+
+function skipAudio(s) {
+  const a = document.getElementById('teslaAudioEl');
+  a.currentTime = Math.max(0, a.currentTime + s);
+}
+
+function closeAudioDock() {
+  const a = document.getElementById('teslaAudioEl');
+  a.pause(); a.src = '';
+  document.getElementById('teslaAudioDock').style.display = 'none';
+}
+
+document.getElementById('teslaAudioEl').addEventListener('timeupdate', () => {
+  const a = document.getElementById('teslaAudioEl');
+  document.getElementById('adTime').innerText = fmtTime(a.currentTime) + ' / ' + fmtTime(a.duration || 0) + ' • 🎧 Fahrmodus aktiv';
+});
+
+async function searchItems(q) {
+  document.getElementById('absEmbeddedView').style.display = 'none';
+  if (q.length < 2) { if (q.length === 0) loadHome(); return; }
+  const res = await api('/Users/' + userId + '/Items?SearchTerm=' + encodeURIComponent(q) + '&IncludeItemTypes=Movie,Series,Episode,Audio,AudioBook&Recursive=true&Limit=24');
+  document.getElementById('mainContent').innerHTML = '';
+  renderRow('Suchergebnisse', res.Items, 'poster');
+}
+
+async function openItem(item) {
+  if (item.Type === 'Series') {
+    const eps = await api('/Shows/' + item.Id + '/Episodes?UserId=' + userId + '&Fields=Overview');
+    document.getElementById('modalTitle').innerText = item.Name;
+    const grid = document.getElementById('epGrid');
+    grid.innerHTML = '';
+    eps.Items.forEach((ep, idx) => {
+      const c = document.createElement('div');
+      c.className = 'card wide';
+      c.style.animationDelay = Math.min(idx * 35, 400) + 'ms';
+      const img = API_BASE + '/Items/' + ep.Id + '/Images/Primary?maxWidth=480&quality=78';
+      const pct = ep.UserData && ep.UserData.PlayedPercentage ? Math.round(ep.UserData.PlayedPercentage) : 0;
+      c.innerHTML = '<img src="' + img + '" loading="lazy" decoding="async"><div class="card-info"><div class="card-title">S' + (ep.ParentIndexNumber || 1) + ':E' + (ep.IndexNumber || 1) + ' - ' + ep.Name + '</div><div class="card-sub"><span>🎬 Video</span><span onclick="event.stopPropagation(); closeModal(); startAudioDock({Id:\'' + ep.Id + '\', Name:\'' + ep.Name.replace(/'/g, '') + '\', SeriesName:\'' + item.Name.replace(/'/g, '') + '\'})" style="color:#4ade80;font-weight:700;">🎧 Nur Ton</span></div></div>' + (pct ? '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>' : '');
+      c.onclick = () => { closeModal(); currentSubIndex = -1; currentAudioIndex = -1; smartStartPlayback(ep); };
+      grid.appendChild(c);
+    });
+    document.getElementById('seriesModal').style.display = 'flex';
+  } else {
+    currentSubIndex = -1; currentAudioIndex = -1;
+    smartStartPlayback(item);
+  }
+}
+
+function closeModal() { document.getElementById('seriesModal').style.display = 'none'; }
+
+
+var qualityIdx = 0;
+var qualityProfiles = [
+  { label: '📶 Quali: Max', badge: 'ORIGINAL / MAX', bitrate: 40000000, w: 3840, h: 2160, copyVideo: true },
+  { label: '📶 Quali: 1080p (8M)', badge: '1080P HOCH (8 MBIT)', bitrate: 8000000, w: 1920, h: 1080, copyVideo: false },
+  { label: '📶 Quali: 720p (3M)', badge: '720P LTE (3 MBIT)', bitrate: 3000000, w: 1280, h: 720, copyVideo: false },
+  { label: '📶 Quali: 480p (1.2M)', badge: '480P FUNKLOCH (1.2 MBIT)', bitrate: 1200000, w: 854, h: 480, copyVideo: false }
+];
+
+function cycleQuality() {
+  qualityIdx = (qualityIdx + 1) % qualityProfiles.length;
+  var qProf = qualityProfiles[qualityIdx];
+  var btn = document.getElementById('qualBtn');
+  if (btn) {
+    btn.innerText = qProf.label;
+    btn.classList.toggle('active-mode', qualityIdx > 0);
+  }
+  if (currentItem) {
+    var needTrans = (qualityIdx > 0) ? true : isTranscoding;
+    startPlayback(currentItem, needTrans, Math.floor(getActualTime()));
+  }
+  wakeOsd();
+}
+
+async function smartStartPlayback(item) {
+  var v = document.getElementById('videoEl');
+  document.getElementById('playerOverlay').style.display = 'flex';
+  if (v) {
+    v.muted = false;
+    v.volume = 1.0;
+    try { v.load(); } catch (e) {}
+  }
+  var needAac = (qualityIdx > 0);
+  var fullItem = null;
+  try {
+    fullItem = await api('/Users/' + userId + '/Items/' + item.Id);
+    var streams = (fullItem && fullItem.MediaStreams) ? fullItem.MediaStreams : [];
+    for (var i = 0; i < streams.length; i++) {
+      if (streams[i].Type === 'Audio') {
+        var codec = (streams[i].Codec || '').toLowerCase();
+        var ch = streams[i].Channels || 2;
+        if (codec.indexOf('ac3') > -1 || codec.indexOf('dts') > -1 || codec.indexOf('dca') > -1 || codec.indexOf('truehd') > -1 || ch > 2) {
+          needAac = true;
+        }
+        break;
+      }
+    }
+  } catch (e) {}
+  startPlayback(fullItem || item, needAac);
+}
+
+function startPlayback(item, forceTranscode, customStartSec) {
+  closeAudioDock();
+  currentItem = item;
+  var qProf = qualityProfiles[qualityIdx];
+  isTranscoding = Boolean(forceTranscode) || (qualityIdx > 0);
+  var v = document.getElementById('videoEl');
+  if (hls) { hls.destroy(); hls = null; }
+
+  var defaultSec = (item.UserData && item.UserData.PlaybackPositionTicks) ? Math.floor(item.UserData.PlaybackPositionTicks / 10000000) : 0;
+  var resumeSec = (typeof customStartSec === 'number') ? customStartSec : defaultSec;
+
+  document.getElementById('playerTitle').innerText = item.SeriesName ? (item.SeriesName + ' - ' + item.Name) : item.Name;
+  document.getElementById('playerOverlay').style.display = 'flex';
+  document.getElementById('streamModeBadge').innerText = (qualityIdx > 0) ? qProf.badge : (isTranscoding ? 'AAC STEREO STREAM' : 'DIRECT STREAM');
+  document.getElementById('transcodeBtn').classList.toggle('active-mode', isTranscoding);
+  evaluateDriveSafety();
+
+  v.muted = false;
+  v.volume = 1.0;
+  v.onplay = function() { document.getElementById('playPauseBtn').innerText = '⏸'; };
+  v.onpause = function() { document.getElementById('playPauseBtn').innerText = '▶'; };
+
+  if (isTranscoding === false) {
+    transcodeOffset = 0;
+    v.src = API_BASE + '/Videos/' + item.Id + '/stream?Static=true&MediaSourceId=' + item.Id + '&api_key=' + token;
+    v.currentTime = resumeSec;
+    v.play().catch(function() { startPlayback(item, true, resumeSec); });
+  } else {
+    transcodeOffset = resumeSec;
+    var copyFlags = (currentSubIndex < 0 && qProf.copyVideo) ? '&AllowVideoStreamCopy=true&EnableAutoStreamCopy=true' : ('&MaxWidth=' + qProf.w + '&MaxHeight=' + qProf.h);
+    var subParam = (currentSubIndex >= 0 ? ('&SubtitleStreamIndex=' + currentSubIndex + '&SubtitleMethod=Encode') : '') + (currentAudioIndex >= 0 ? ('&AudioStreamIndex=' + currentAudioIndex) : '');
+    var baseParams = 'MediaSourceId=' + item.Id + subParam + copyFlags + '&VideoCodec=h264&AudioCodec=aac&VideoBitRate=' + qProf.bitrate + '&AudioBitRate=192000&MaxAudioChannels=2&TranscodingMaxAudioChannels=2&StartTimeTicks=' + (resumeSec * 10000000) + '&DeviceId=tesla-master-22&PlaySessionId=' + Date.now() + '&api_key=' + token;
+    var hlsUrl = API_BASE + '/Videos/' + item.Id + '/master.m3u8?' + baseParams + '&SegmentContainer=ts&MinSegments=1&BreakOnNonKeyFrames=true';
+    var mp4FallbackUrl = API_BASE + '/Videos/' + item.Id + '/stream.mp4?Static=false&' + baseParams;
+
+    if (window.Hls && Hls.isSupported()) {
+      hls = new Hls({ manifestLoadingTimeOut: 9000 });
+      hls.loadSource(hlsUrl);
+      hls.attachMedia(v);
+      hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        v.play().catch(function() { document.getElementById('playPauseBtn').innerText = '▶'; });
+      });
+      hls.on(Hls.Events.ERROR, function(ev, data) {
+        if (data && data.fatal) {
+          hls.destroy(); hls = null;
+          v.src = mp4FallbackUrl;
+          v.play().catch(function() { document.getElementById('playPauseBtn').innerText = '▶'; });
+        }
+      });
+    } else {
+      v.src = mp4FallbackUrl;
+      v.play().catch(function() { document.getElementById('playPauseBtn').innerText = '▶'; });
+    }
+  }
+
+  wakeOsd();
+  clearInterval(progressInterval);
+  progressInterval = setInterval(reportProgress, 10000);
+}
+
+function cycleZoom() {
+  const v = document.getElementById('videoEl');
+  const btn = document.getElementById('zoomBtn');
+  zoomLevel = (zoomLevel + 1) % 3;
+  v.classList.remove('zoom-half', 'zoom-full');
+  if (zoomLevel === 0) btn.innerText = 'Format: Original';
+  if (zoomLevel === 1) { v.classList.add('zoom-half'); btn.innerText = 'Format: 16:10 Zoom'; }
+  if (zoomLevel === 2) { v.classList.add('zoom-full'); btn.innerText = 'Format: Vollbild'; }
+}
+
+function getActualTime() {
+  const v = document.getElementById('videoEl');
+  return isTranscoding ? (transcodeOffset + v.currentTime) : v.currentTime;
+}
+
+function getTotalDuration() {
+  const v = document.getElementById('videoEl');
+  if (currentItem && currentItem.RunTimeTicks) return currentItem.RunTimeTicks / 10000000;
+  return v.duration || 1;
+}
+
+function toggleTranscode() {
+  if (currentItem == null) return;
+  startPlayback(currentItem, isTranscoding === false, Math.floor(getActualTime()));
+}
+
+function togglePlay() {
+  const v = document.getElementById('videoEl');
+  if (v.paused) { v.play(); document.getElementById('playPauseBtn').innerText = '⏸'; }
+  else { v.pause(); document.getElementById('playPauseBtn').innerText = '▶'; }
+  wakeOsd();
+}
+
+function skip(sec) {
+  const target = Math.max(0, getActualTime() + sec);
+  if (isTranscoding) startPlayback(currentItem, true, Math.floor(target));
+  else document.getElementById('videoEl').currentTime = target;
+  wakeOsd();
+}
+
+function previewSeek(pct){var t=(pct/100)*getTotalDuration();document.getElementById('curTime').innerText=fmtTime(t);wakeOsd();}
+function seekVideo(pct) {
+  const target = (pct / 100) * getTotalDuration();
+  if (isTranscoding) startPlayback(currentItem, true, Math.floor(target));
+  else document.getElementById('videoEl').currentTime = target;
+  wakeOsd();
+}
+
+function fmtTime(s) {
+  if (Boolean(s) === false || isNaN(s) || s < 0) return '0:00';
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = Math.floor(s % 60);
+  return (h > 0 ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(sec).padStart(2, '0');
+}
+
+document.getElementById('videoEl').addEventListener('timeupdate', () => {
+  const cur = getActualTime();
+  const dur = getTotalDuration();
+  if (dur > 0) {
+    const rem = Math.max(0, dur - cur);
+    document.getElementById('seekSlider').value = Math.min(100, (cur / dur) * 100);
+    document.getElementById('curTime').innerText = fmtTime(cur);
+    document.getElementById('remTime').innerText = '-' + fmtTime(rem);
+    document.getElementById('osdMetaClock').innerText = getFinishTimeString(rem);
+  }
+});
+
+async function reportProgress() {
+  const v = document.getElementById('videoEl');
+  if (currentItem == null) return;
+  const ticks = Math.floor(getActualTime() * 10000000);
+  currentItem.UserData = currentItem.UserData || {};
+  currentItem.UserData.PlaybackPositionTicks = ticks;
+  try {
+    await api('/Sessions/Playing/Progress', {
+      method: 'POST',
+      body: JSON.stringify({ ItemId: currentItem.Id, PositionTicks: ticks, IsPaused: v.paused, PlaySessionId: 'tesla-master-18' })
+    });
+  } catch (e) {}
+}
+
+function closePlayer() {
+  reportProgress();
+  clearInterval(progressInterval);
+  const v = document.getElementById('videoEl');
+  v.pause(); v.src = '';
+  if (hls) { hls.destroy(); hls = null; }
+  document.getElementById('playerOverlay').style.display = 'none';
+  loadHome();
+}
+
+function wakeOsd() {
+  const ov = document.getElementById('playerOverlay');
+  ov.classList.remove('osd-hidden');
+  clearTimeout(osdTimer);
+  osdTimer = setTimeout(() => {
+    if (document.getElementById('videoEl').paused === false) ov.classList.add('osd-hidden');
+  }, 3500);
+}
+
+/* TESLA CAMP-MODE KAMINFEUER */
+
+(function() {
+  var st = document.createElement('style');
+  st.innerHTML = '@media (max-width: 980px) { header { height: auto !important; min-height: 70px !important; flex-wrap: wrap !important; padding: 10px 14px !important; gap: 8px !important; } .t-brand { padding-top: 18px !important; } .t-actions { padding-top: 18px !important; gap: 6px !important; } .t-tabs { order: 3 !important; width: 100% !important; overflow-x: auto !important; margin-top: 4px !important; display: flex !important; } #hero { margin-top: 118px !important; height: 52vh !important; padding: 24px 18px !important; } .hero-title { font-size: 2rem !important; } main { padding: 10px 16px 90px !important; } #absEmbeddedView { top: 126px !important; } }';
+  document.head.appendChild(st);
+})();
+
+
+async function cycleAudioTrack() {
+  if (Boolean(currentItem) === false) return;
+  try {
+    var full = await api('/Users/' + userId + '/Items/' + currentItem.Id);
+    var aStreams = (full.MediaStreams || []).filter(function(st) { return st.Type === 'Audio'; });
+    if (aStreams.length <= 1) {
+      document.getElementById('audioTrackBtn').innerText = '🌐 Nur 1 Tonspur';
+      return;
+    }
+    var curPos = aStreams.findIndex(function(st) { return st.Index === currentAudioIndex; });
+    var nextPos = (curPos + 1) % aStreams.length;
+    var nextTrack = aStreams[nextPos];
+    currentAudioIndex = nextTrack.Index;
+    var lang = (nextTrack.Language || ('Spur ' + (nextPos + 1))).toUpperCase();
+    var btn = document.getElementById('audioTrackBtn');
+    btn.innerText = '🌐 Ton: ' + lang;
+    btn.classList.add('active-mode');
+    startPlayback(currentItem, true, Math.floor(getActualTime()));
+  } catch (e) {}
+  wakeOsd();
+}
+
+/* Auto-Next-Episode bei Serienende */
+document.getElementById('videoEl').addEventListener('ended', async function() {
+  if (currentItem && currentItem.Type === 'Episode' && currentItem.SeriesId) {
+    try {
+      var eps = await api('/Shows/' + currentItem.SeriesId + '/Episodes?UserId=' + userId);
+      var list = eps.Items || [];
+      var idx = list.findIndex(function(e) { return e.Id === currentItem.Id; });
+      if (idx >= 0 && idx + 1 < list.length) {
+        smartStartPlayback(list[idx + 1]);
+        return;
+      }
+    } catch (e) {}
+  }
+  closePlayer();
+});
+
+/* Doppel-Tipp links (-15s) / rechts (+30s) im Video-Player */
+var lastVideoTap = 0;
+document.getElementById('videoEl').addEventListener('touchend', function(ev) {
+  var now = Date.now();
+  if (now - lastVideoTap < 320 && ev.changedTouches && ev.changedTouches[0]) {
+    var x = ev.changedTouches[0].clientX;
+    var w = window.innerWidth || 1000;
+    if (x < w * 0.35) { skip(-15); ev.preventDefault(); }
+    else if (x > w * 0.65) { skip(30); ev.preventDefault(); }
+  }
+  lastVideoTap = now;
+});
+
+loadHome();
+setTimeout(function() {
+  var ht = document.getElementById('heroTitle');
+  if (ht && ht.innerText.indexOf('Lade Mediathek') > -1) {
+    localStorage.removeItem('jf_token');
+    localStorage.removeItem('jf_user');
+    showLoginScreen();
+  }
+}, 2200);
+</script>
+</body>
+</html>
