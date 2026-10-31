@@ -77,3 +77,10 @@ Mit *Tailscale Funnel* bekommt dein Server zuhause eine eigene, verschlüsselte 
   Normalerweise blendet das Dashboard ab 3 km/h das Videobild aus (StVO-Schutz, der Ton läuft weiter).
   * **Freischalten für den Beifahrer:** Tippe oben links **5-mal schnell hintereinander** auf das **`TESLA | THEATER`**-Logo, bis es rot leuchtet (`CO-PILOT UNLOCKED`).
   * **Panik-Knopf:** Solange das Auto rollt und der Beifahrer-Modus aktiv ist, reicht **ein einziger Tipp mitten auf das laufende Video**, um das Video sofort zu schließen und den Geheimmodus wieder zu verriegeln.
+
+
+## 🤖 Bonus: Tailscale-Timer per Telegram-Bot steuern
+
+1. Erstelle einen Bot über den `@BotFather` auf Telegram.
+2. Baue ein kurzes Python-Skript auf deinem Server mit `python-telegram-bot`.
+3. Befehl im Chat schicken -> Server führt `sudo tailscale up` aus und startet einen Timer (`sleep 7200 && sudo tailscale down`).
