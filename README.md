@@ -8,7 +8,7 @@ Dein eigenes **Netflix & Audible direkt im Tesla** – komplett kostenlos über 
 Der normale Jellyfin-Player ist im Tesla-Browser oft fummelig: Die Knöpfe sind während der Fahrt viel zu klein, Filme mit Kinoton (Dolby 5.1 / DTS) bleiben im Tesla stumm und bei schwachem Mobilfunk ruckelt das Bild.
 
 **Tesla Theater OS** legt sich als schicke, dunkle Oberfläche im originalen Tesla-Look direkt über dein Jellyfin:
-* **Riesige Touch-Knöpfe** speziell für den 15-Zoll-Bildschirm im Auto (und für dein Handy).
+* **Riesige Touch-Knöpfe** speziell für den 16-Zoll-Bildschirm im Auto (und für dein Handy).
 * **Automatischer Ton-Fix (AAC):** Macht stumme Dolby-/DTS-Filme sofort hörbar, ohne dass dein Server schwitzen muss.
 * **Funkloch-Schutz (Qualitäts-Umschalter):** Schalte mitten im Film mit einem Tipp zwischen `Max`, `1080p`, `720p (LTE)` und `480p (Funkloch)` um.
 * **Hörbücher & Kinder-Hörspiele:** Integriert **Audiobookshelf** direkt als eigenen Reiter plus Mini-Audio-Player.
