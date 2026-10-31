@@ -1,4 +1,4 @@
-# 🚗 Tesla Theater OS – Die Anleitung für Dummies
+# 🚗 DashStream – Die Anleitung für Dummies
 
 Dein eigenes **Netflix & Audible direkt im Tesla** – komplett kostenlos über deinen eigenen Heimserver mit **Jellyfin** und **Audiobookshelf**.
 
@@ -7,7 +7,7 @@ Dein eigenes **Netflix & Audible direkt im Tesla** – komplett kostenlos über 
 ## 🤔 Was macht dieses Projekt?
 Der normale Jellyfin-Player ist im Tesla-Browser oft fummelig: Die Knöpfe sind während der Fahrt viel zu klein, Filme mit Kinoton (Dolby 5.1 / DTS) bleiben im Tesla stumm und bei schwachem Mobilfunk ruckelt das Bild.
 
-**Tesla Theater OS** legt sich als schicke, dunkle Oberfläche im originalen Tesla-Look direkt über dein Jellyfin:
+**DashStream** legt sich als schicke, dunkle Oberfläche im originalen Tesla-Look direkt über dein Jellyfin:
 * **Riesige Touch-Knöpfe** speziell für den 16-Zoll-Bildschirm im Auto (und für dein Handy).
 * **Automatischer Ton-Fix (AAC):** Macht stumme Dolby-/DTS-Filme sofort hörbar, ohne dass dein Server schwitzen muss.
 * **Funkloch-Schutz (Qualitäts-Umschalter):** Schalte mitten im Film mit einem Tipp zwischen `Max`, `1080p`, `720p (LTE)` und `480p (Funkloch)` um.
@@ -20,8 +20,8 @@ Der normale Jellyfin-Player ist im Tesla-Browser oft fummelig: Die Knöpfe sind 
 
 Du brauchst nur einen Server (z. B. Mini-PC, Raspberry Pi oder NAS), auf dem **Jellyfin als Docker-Container** läuft. Logge dich per Terminal (SSH) auf deinem Server ein und kopiere diese 4 Zeilen hinein:
 
-    git clone https://github.com/bierzelt-kind/tesla-theater-os.git
-    cd tesla-theater-os
+    git clone https://github.com/bierzelt-kind/dashstream.git
+    cd dashstream
     chmod +x install.sh
     ./install.sh
 
