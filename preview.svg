@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f1115"/>
+      <stop offset="100%" stop-color="#07080a"/>
+    </linearGradient>
+    <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a2436"/>
+      <stop offset="60%" stop-color="#0f141d"/>
+      <stop offset="100%" stop-color="#0a0c10"/>
+    </linearGradient>
+    <linearGradient id="card1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="card2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#31102f"/>
+      <stop offset="100%" stop-color="#130714"/>
+    </linearGradient>
+    <linearGradient id="card3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f2922"/>
+      <stop offset="100%" stop-color="#06120f"/>
+    </linearGradient>
+    <linearGradient id="card4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2b1d0e"/>
+      <stop offset="100%" stop-color="#120c06"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="675" rx="18" fill="url(#bg)" stroke="#222630" stroke-width="2"/>
+
+  <!-- Top Navigation / Status Bar -->
+  <rect x="0" y="0" width="1200" height="68" rx="18" fill="#12151c"/>
+  <line x1="0" y1="68" x2="1200" y2="68" stroke="#232834" stroke-width="1.5"/>
+
+  <!-- Brand Logo -->
+  <text x="36" y="42" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="800" letter-spacing="3">DASH<tspan fill="#3e6ae1">STREAM</tspan></text>
+
+  <!-- Navigation Tabs -->
+  <rect x="240" y="16" width="150" height="36" rx="8" fill="#1f2533"/>
+  <text x="315" y="39" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Filme &amp; Serien</text>
+
+  <rect x="400" y="16" width="140" height="36" rx="8" fill="transparent"/>
+  <text x="470" y="39" fill="#8b93a6" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">Audiobookshelf</text>
+
+  <!-- TeslaMate Live Status Pill -->
+  <rect x="580" y="15" width="380" height="38" rx="19" fill="#171b24" stroke="#283040" stroke-width="1"/>
+  <!-- Battery Icon -->
+  <rect x="600" y="26" width="28" height="16" rx="3" fill="none" stroke="#22c55e" stroke-width="2"/>
+  <rect x="629" y="30" width="3" height="8" rx="1" fill="#22c55e"/>
+  <rect x="603" y="29" width="18" height="10" rx="1.5" fill="#22c55e"/>
+  <text x="642" y="39" fill="#ffffff" font-family="system-ui, sans-serif" font-size="13" font-weight="700">78%  •  342 km</text>
+  <text x="752" y="39" fill="#22c55e" font-family="system-ui, sans-serif" font-size="13" font-weight="700">⚡ 118 kW (Limit 80%)</text>
+
+  <!-- Fullscreen Button -->
+  <rect x="1030" y="15" width="136" height="38" rx="9" fill="#3e6ae1"/>
+  <text x="1098" y="39" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700" text-anchor="middle">⛶  Vollbild</text>
+
+  <!-- Hero Banner (Active Player / Featured Content) -->
+  <rect x="36" y="94" width="1128" height="250" rx="16" fill="url(#hero)" stroke="#263042" stroke-width="1.5"/>
+  <rect x="64" y="122" width="110" height="26" rx="6" fill="#3e6ae1" fill-opacity="0.25"/>
+  <text x="119" y="140" fill="#6892ff" font-family="system-ui, sans-serif" font-size="12" font-weight="700" text-anchor="middle">DIRECT STREAM</text>
+
+  <text x="64" y="185" fill="#ffffff" font-family="system-ui, sans-serif" font-size="34" font-weight="800">Weiterschauen im Fahrzeug</text>
+  <text x="64" y="218" fill="#9ca3b5" font-family="system-ui, sans-serif" font-size="16">Automatischer AAC-Stereo Ton-Fix  •  Live-Qualitätswahl  •  Serien Auto-Play</text>
+
+  <!-- Hero Control Pills -->
+  <rect x="64" y="252" width="190" height="52" rx="10" fill="#ffffff"/>
+  <text x="159" y="284" fill="#0b0d12" font-family="system-ui, sans-serif" font-size="16" font-weight="800" text-anchor="middle">▶  Folge fortsetzen</text>
+
+  <rect x="270" y="252" width="185" height="52" rx="10" fill="#1f2737" stroke="#333f58" stroke-width="1"/>
+  <text x="362" y="284" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">🌐 Ton: Deutsch (AAC)</text>
+
+  <rect x="470" y="252" width="185" height="52" rx="10" fill="#1f2737" stroke="#333f58" stroke-width="1"/>
+  <text x="562" y="284" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">📶 Quali: 1080p (LTE)</text>
+
+  <rect x="670" y="252" width="170" height="52" rx="10" fill="#1f2737" stroke="#333f58" stroke-width="1"/>
+  <text x="755" y="284" fill="#e2e8f0" font-family="system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">💬 Untertitel: Aus</text>
+
+  <!-- Section Title -->
+  <text x="36" y="384" fill="#ffffff" font-family="system-ui, sans-serif" font-size="20" font-weight="700">Zuletzt hinzugefügt &amp; Weiterhören</text>
+
+  <!-- Media Cards Row -->
+  <!-- Card 1 -->
+  <rect x="36" y="404" width="264" height="168" rx="12" fill="url(#card1)" stroke="#2a3446" stroke-width="1.5"/>
+  <circle cx="168" cy="472" r="24" fill="#000000" fill-opacity="0.55" stroke="#ffffff" stroke-width="1.5"/>
+  <polygon points="163,462 163,482 179,472" fill="#ffffff"/>
+  <rect x="52" y="534" width="140" height="6" rx="3" fill="#334155"/>
+  <rect x="52" y="534" width="95" height="6" rx="3" fill="#3e6ae1"/>
+  <text x="52" y="522" fill="#ffffff" font-family="system-ui, sans-serif" font-size="15" font-weight="700">Sci-Fi Blockbuster (4K)</text>
+
+  <!-- Card 2 -->
+  <rect x="324" y="404" width="264" height="168" rx="12" fill="url(#card2)" stroke="#3d223c" stroke-width="1.5"/>
+  <circle cx="456" cy="472" r="24" fill="#000000" fill-opacity="0.55" stroke="#ffffff" stroke-width="1.5"/>
+  <polygon points="451,462 451,482 467,472" fill="#ffffff"/>
+  <rect x="340" y="534" width="140" height="6" rx="3" fill="#334155"/>
+  <rect x="340" y="534" width="60" height="6" rx="3" fill="#ec4899"/>
+  <text x="340" y="522" fill="#ffffff" font-family="system-ui, sans-serif" font-size="15" font-weight="700">Serien-Staffel 2 • S02E05</text>
+
+  <!-- Card 3 -->
+  <rect x="612" y="404" width="264" height="168" rx="12" fill="url(#card3)" stroke="#1d3b32" stroke-width="1.5"/>
+  <circle cx="744" cy="472" r="24" fill="#000000" fill-opacity="0.55" stroke="#ffffff" stroke-width="1.5"/>
+  <polygon points="739,462 739,482 755,472" fill="#ffffff"/>
+  <text x="628" y="522" fill="#ffffff" font-family="system-ui, sans-serif" font-size="15" font-weight="700">Action &amp; Kino (5.1 → AAC)</text>
+  <text x="628" y="544" fill="#34d399" font-family="system-ui, sans-serif" font-size="12" font-weight="600">✓ Direkt-Ton aktiv</text>
+
+  <!-- Card 4 -->
+  <rect x="900" y="404" width="264" height="168" rx="12" fill="url(#card4)" stroke="#42301b" stroke-width="1.5"/>
+  <circle cx="1032" cy="472" r="24" fill="#000000" fill-opacity="0.55" stroke="#ffffff" stroke-width="1.5"/>
+  <polygon points="1027,462 1027,482 1043,472" fill="#ffffff"/>
+  <text x="916" y="522" fill="#ffffff" font-family="system-ui, sans-serif" font-size="15" font-weight="700">Kinder-Hörspiel &amp; Hörbuch</text>
+  <text x="916" y="544" fill="#fbbf24" font-family="system-ui, sans-serif" font-size="12" font-weight="600">🎧 Audiobookshelf Dock</text>
+
+  <!-- Bottom Mini Audio Dock -->
+  <rect x="36" y="594" width="1128" height="56" rx="12" fill="#141821" stroke="#252c3d" stroke-width="1.5"/>
+  <circle cx="68" cy="622" r="16" fill="#3e6ae1"/>
+  <polygon points="65,615 65,629 76,622" fill="#ffffff"/>
+  <text x="98" y="618" fill="#ffffff" font-family="system-ui, sans-serif" font-size="14" font-weight="700">Audiobookshelf Mini-Player  •  Kapitel 4 (Lesezeichen synchronisiert)</text>
+  <text x="98" y="636" fill="#8b93a6" font-family="system-ui, sans-serif" font-size="12">Spielt im Hintergrund weiter  •  Doppeltipp-Spulen: -15s / +30s</text>
+  <text x="1040" y="627" fill="#9ca3b5" font-family="system-ui, sans-serif" font-size="13" font-weight="700">-15s    ⏸    +30s</text>
+</svg>

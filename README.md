@@ -1,5 +1,7 @@
 # 🚗 DashStream – Die Anleitung für Dummies
 
+![DashStream Vorschau](preview.svg)
+
 Dein eigenes **Kino & Hörbuch-Studio direkt im Auto-Browser** – komplett kostenlos über deinen eigenen Heimserver mit **Jellyfin** und **Audiobookshelf**.
 
 ---
@@ -191,9 +193,12 @@ sudo systemctl enable --now dashstream-bot.service
 ```
 
 **So nutzt du den Bot ab sofort in Telegram:**
-* **`dashstream an`** $ightarrow$ Schaltet Tailscale & Funnel sofort ein und startet den 2-Stunden-Countdown.
-* **`dashstream aus`** $ightarrow$ Schaltet Tailscale sofort wieder ab.
-* **`dashstream status`** $ightarrow$ Zeigt dir live, ob Tailscale gerade an oder aus ist.
+* **`dashstream an`** $
+ightarrow$ Schaltet Tailscale & Funnel sofort ein und startet den 2-Stunden-Countdown.
+* **`dashstream aus`** $
+ightarrow$ Schaltet Tailscale sofort wieder ab.
+* **`dashstream status`** $
+ightarrow$ Zeigt dir live, ob Tailscale gerade an oder aus ist.
 
 ---
 
