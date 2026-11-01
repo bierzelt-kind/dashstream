@@ -299,3 +299,14 @@ Damit die Ladeanzeige immer von selbst mitläuft (auch nach einem Neustart des S
   Standardmäßig schaltet sich das Videobild beim Losfahren ab 3 km/h dunkel (der Ton läuft weiter).
   * **Freischalten für den Beifahrer:** Tippe oben links **5-mal schnell hintereinander** auf das Logo, bis es rot leuchtet (`CO-PILOT UNLOCKED`).
   * **Panik-Knopf:** Ein einziger Tipp mitten auf das laufende Video während der Fahrt schließt das Video sofort und verriegelt den Modus wieder.
+
+---
+
+## ❓ Häufige Fragen (FAQ)
+
+* **Nach einem Jellyfin-Docker-Update ist DashStream verschwunden (404 Not Found)?**
+  Wenn du deinen Jellyfin-Container aktualisierst, setzt Docker den internen Web-Ordner zurück. Führe danach im Ordner `dashstream` einfach noch einmal kurz `./install.sh` aus – in 2 Sekunden ist alles wieder da.
+* **Ich nutze kein TeslaMate oder kein Audiobookshelf – geht DashStream trotzdem?**
+  Ja! Wenn keine `tesla_status.json` vorhanden ist, läuft DashStream ganz normal als reiner Mediaplayer für Jellyfin weiter.
+* **Warum muss ich mich beim ersten Aufruf einloggen?**
+  DashStream nutzt die offizielle Jellyfin-Anmeldung deines Servers. Du loggst dich beim allerersten Mal im Auto-Browser auf deiner normalen Jellyfin-Startseite ein (Haken bei „Angemeldet bleiben“ setzen) und rufst danach `/web/dashstream.html` auf.
