@@ -277,8 +277,12 @@
 <body>
 
 <div id="bootSplash">
-  <div class="boot-word">TESLA</div>
-  <div class="boot-sub">THEATER OS</div>
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style="margin-bottom:6px;filter:drop-shadow(0 0 16px rgba(232,33,39,0.6));">
+    <rect x="2" y="2" width="20" height="20" rx="6" fill="rgba(232,33,39,0.2)" stroke="#e82127" stroke-width="2"/>
+    <path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#ffffff"/>
+  </svg>
+  <div class="boot-word">DASHSTREAM</div>
+  <div class="boot-sub">THEATER OS • v24.0</div>
 </div>
 
 <div id="batteryEdgeWrap">
@@ -289,17 +293,21 @@
   </div>
   <div class="edge-info-pill">
     <div class="edge-dot"></div>
-    <span id="edgeSocTxt">🔋 38% (165 km)</span>
+    <span id="edgeSocTxt">🔋 80% (350 km)</span>
     <span>•</span>
-    <span id="edgeTimeTxt">⚡ Ladedauer bis 80%: ca. 18 Min.</span>
+    <span id="edgeTimeTxt">⚡ TeslaMate aktiv</span>
   </div>
 </div>
 
 <header>
   <div class="t-brand" onclick="handleSecretLogoTap()" title="DashStream">
-    <div class="t-logo" id="teslaLogoTxt">TESLA</div>
+    <svg class="ds-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+  <rect x="2" y="2" width="20" height="20" rx="6" fill="rgba(232,33,39,0.15)" stroke="var(--tesla-red)" stroke-width="2"/>
+  <path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#ffffff"/>
+</svg>
+    <div class="t-logo" id="teslaLogoTxt">DASH</div>
     <div class="t-sep"></div>
-    <div class="t-sub" id="teslaSubTxt">THEATER</div>
+    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v24.0</span>
   </div>
 
   <div class="t-tabs">
@@ -385,10 +393,14 @@
 </div>
 
 <div id="playerOverlay" onclick="handlePlayerTap()">
-  <div id="driveSafetyShield">
+  <div id="driveSafetyShield" onclick="event.stopPropagation()">
     <div class="shield-icon">🎧</div>
     <div class="shield-title">Fahrmodus aktiv – Nur Audio-Wiedergabe</div>
-    <div class="shield-sub">Aus Sicherheitsgründen (StVO) ist das Videobild während der Fahrt ausgeblendet. Sobald das Fahrzeug parkt, erscheint das Bild automatisch wieder.</div>
+    <div class="shield-sub">Aus Sicherheitsgründen (StVO) ist das Videobild während der Fahrt (> 3 km/h) ausgeblendet. Der Ton läuft normal weiter.</div>
+    <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;justify-content:center;">
+      <button class="btn-play" onclick="enableCoPilot()">👑 Beifahrer-Modus (Co-Pilot) freischalten</button>
+      <button class="btn-sec" onclick="closePlayer()">✕ Player schließen</button>
+    </div>
   </div>
 
   <div class="osd-top" onclick="event.stopPropagation()">
@@ -456,7 +468,7 @@ var campFireAnim = null;
 
 function getAbsUrl() {
   if (window.location.hostname.indexOf('ts.net') > -1) {
-    return 'https://' + window.location.hostname + ':8444';
+    return 'https://' + window.location.hostname + ':8443';
   }
   return 'http://' + window.location.hostname + ':' + ABS_LOCAL_PORT;
 }
@@ -497,22 +509,28 @@ async function showNativeAudioFallback() {
   } catch (e) {}
 }
 
+function setCoPilotState(active) {
+  secretOverride = Boolean(active);
+  localStorage.setItem('tesla_copilot', secretOverride ? '1' : '0');
+  document.getElementById('teslaLogoTxt').classList.toggle('override-on', secretOverride);
+  document.getElementById('teslaSubTxt').innerText = secretOverride ? 'CO-PILOT AKTIV' : 'STREAM';
+  evaluateDriveSafety();
+}
+function enableCoPilot() { setCoPilotState(true); }
 function handleSecretLogoTap() {
   logoTapCount++;
   clearTimeout(logoTapTimer);
   logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 1800);
   if (logoTapCount >= 5) {
     logoTapCount = 0;
-    secretOverride = secretOverride === false;
-    document.getElementById('teslaLogoTxt').classList.toggle('override-on', secretOverride);
-    document.getElementById('teslaSubTxt').innerText = secretOverride ? 'CO-PILOT UNLOCKED' : 'THEATER';
-    evaluateDriveSafety();
+    setCoPilotState(!secretOverride);
   }
 }
 
 function evaluateDriveSafety() {
   const shield = document.getElementById('driveSafetyShield');
-  if (currentSpeedKmh > 3 && secretOverride === false) {
+  if (!shield) return;
+  if (currentSpeedKmh > 3 && !secretOverride) {
     shield.style.display = 'flex';
   } else {
     shield.style.display = 'none';
@@ -520,13 +538,6 @@ function evaluateDriveSafety() {
 }
 
 function handlePlayerTap() {
-  if (secretOverride && currentSpeedKmh > 3) {
-    secretOverride = false;
-    document.getElementById('teslaLogoTxt').classList.remove('override-on');
-    document.getElementById('teslaSubTxt').innerText = 'THEATER';
-    closePlayer();
-    return;
-  }
   wakeOsd();
 }
 
@@ -535,7 +546,7 @@ if ('mediaSession' in navigator) {
     if (secretOverride) {
       secretOverride = false;
       document.getElementById('teslaLogoTxt').classList.remove('override-on');
-      document.getElementById('teslaSubTxt').innerText = 'THEATER';
+      document.getElementById('teslaSubTxt').innerText = 'STREAM';
       closePlayer();
     } else {
       togglePlay();
@@ -589,7 +600,8 @@ function toggleBatteryBar() {
 
 async function pollBatteryBar() {
   try {
-    const r = await fetch(API_BASE + '/web/tesla_live.json?t=' + Date.now());
+    let r = await fetch(API_BASE + '/web/tesla_live.json?t=' + Date.now());
+    if (!r.ok) r = await fetch('tesla_live.json?t=' + Date.now());
     if (r.ok) {
       const d = await r.json();
       if (d && d.live) {
@@ -605,7 +617,7 @@ async function pollBatteryBar() {
         if (d.kw > 0) {
           document.getElementById('edgeTimeTxt').innerText = '⚡ ' + d.kw + ' kW (+' + (d.added_kwh || 0) + ' kWh) • Noch ' + (d.eta_min || 0) + ' Min. bis ' + limit + '%';
         } else {
-          document.getElementById('edgeTimeTxt').innerText = 'Ladelimit bei ' + limit + '% • Fahrzeug bereit';
+          document.getElementById('edgeTimeTxt').innerText = 'Limit ' + limit + '% • ' + (d.car_state || 'BEREIT') + (d.outside_temp ? (' • ' + d.outside_temp + '°C') : '');
         }
         return;
       }
