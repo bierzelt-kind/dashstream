@@ -282,7 +282,7 @@
     <path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#ffffff"/>
   </svg>
   <div class="boot-word">DASHSTREAM</div>
-  <div class="boot-sub">THEATER OS • v27.0</div>
+  <div class="boot-sub">THEATER OS • v28.0</div>
 </div>
 
 <div id="batteryEdgeWrap">
@@ -307,7 +307,7 @@
 </svg>
     <div class="t-logo" id="teslaLogoTxt">DASH</div>
     <div class="t-sep"></div>
-    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v27.0</span>
+    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v28.0</span>
   </div>
 
   <div class="t-tabs">
@@ -346,7 +346,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <div>
         <div style="font-size:1.2rem;font-weight:800;letter-spacing:1px;">🚗 TESLA LIVE-COCKPIT</div>
-        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v27.0</div>
+        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v28.0</div>
       </div>
       <button class="t-btn" onclick="toggleCockpitModal()">✕</button>
     </div>
@@ -480,7 +480,8 @@
       <button class="btn-ctrl active-mode" id="playerBarBtn" onclick="toggleBatteryBar()">🔋 Ladeleiste</button>
       <button class="btn-ctrl" id="zoomBtn" onclick="cycleZoom()">Format: Original</button>
       <button class="btn-ctrl" id="dspBtn" onclick="cycleDsp()">Audio: Studio</button>
-      <button class="btn-ctrl" id="qualBtn" onclick="cycleQuality()">📶 Quali: Max</button>
+      <button class="btn-ctrl active-mode" id="bypassBtn" onclick="toggleCanvasBypass()">📺 Fahr-Bild: Normal</button>
+      <button class="btn-ctrl active-mode" id="qualBtn" onclick="cycleQuality()">📶 Auto (Max)</button>
       <button class="btn-ctrl" id="transcodeBtn" onclick="toggleTranscode()">Ton-Fix (AAC)</button>
       <button class="btn-ctrl" onclick="requestNativeFullscreen()">Vollbild</button>
       <button class="btn-ctrl" onclick="closePlayer()">✕</button>
@@ -607,8 +608,10 @@ function evaluateDriveSafety() {
   if (!shield) return;
   if (currentSpeedKmh > 3 && !secretOverride) {
     shield.style.display = 'flex';
+    setCanvasBypass(false);
   } else {
     shield.style.display = 'none';
+    if (secretOverride) setCanvasBypass(true);
   }
 }
 
@@ -691,7 +694,7 @@ function updateCockpitUi() {
   document.getElementById('cpFr').innerText = (d.tpms_fr || 2.9) + ' bar';
   document.getElementById('cpRl').innerText = (d.tpms_rl || 2.9) + ' bar';
   document.getElementById('cpRr').innerText = (d.tpms_rr || 2.9) + ' bar';
-  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v27.0';
+  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v28.0';
   var cpBtn = document.getElementById('cpCoPilotBtn');
   if (cpBtn) cpBtn.innerText = secretOverride ? '🔒 Co-Pilot aktiv (Tippen zum Sperren)' : '👑 Beifahrer-Modus (Co-Pilot) aktivieren';
 }
@@ -1067,6 +1070,115 @@ async function openItem(item) {
 function closeModal() { document.getElementById('seriesModal').style.display = 'none'; }
 
 
+
+/* ================= v28.0: BEIFAHRER-CANVAS-BYPASS & AUTO-QUALITÄT ================= */
+var canvasBypassActive = false;
+var bypassAnimId = null;
+var autoQualEnabled = true;
+var stallTimestamps = [];
+
+function ensureBypassCanvas() {
+  var cv = document.getElementById('driveVideoCanvas');
+  if (!cv) {
+    cv = document.createElement('canvas');
+    cv.id = 'driveVideoCanvas';
+    cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:402;pointer-events:none;display:none;background:#000;';
+    var ov = document.getElementById('playerOverlay');
+    var v = document.getElementById('videoEl');
+    if (ov && v) ov.insertBefore(cv, v.nextSibling);
+  }
+  return cv;
+}
+
+function renderVideoToCanvas() {
+  if (!canvasBypassActive) return;
+  var v = document.getElementById('videoEl');
+  var cv = document.getElementById('driveVideoCanvas');
+  if (v && cv && !v.paused && !v.ended && v.videoWidth > 0) {
+    if (cv.width !== v.videoWidth || cv.height !== v.videoHeight) {
+      cv.width = v.videoWidth;
+      cv.height = v.videoHeight;
+    }
+    try {
+      var ctx = cv.getContext('2d');
+      ctx.drawImage(v, 0, 0, cv.width, cv.height);
+    } catch (e) {}
+  }
+  bypassAnimId = requestAnimationFrame(renderVideoToCanvas);
+}
+
+function setCanvasBypass(enable) {
+  var cv = ensureBypassCanvas();
+  var v = document.getElementById('videoEl');
+  var btn = document.getElementById('bypassBtn');
+  canvasBypassActive = Boolean(enable);
+  if (canvasBypassActive) {
+    cv.style.display = 'block';
+    // Video darf NICHT display:none sein, sonst stoppt Chromium das Decoding!
+    // Wir machen es 1x1 Pixel minimal sichtbar hinter dem Canvas.
+    v.style.opacity = '0.01';
+    if (btn) { btn.innerText = '📺 Fahr-Bild: Aktiv (Canvas)'; btn.classList.add('active-mode'); }
+    if (!bypassAnimId) renderVideoToCanvas();
+  } else {
+    cv.style.display = 'none';
+    v.style.opacity = '1';
+    if (btn) { btn.innerText = '📺 Fahr-Bild: Normal'; btn.classList.remove('active-mode'); }
+    if (bypassAnimId) { cancelAnimationFrame(bypassAnimId); bypassAnimId = null; }
+  }
+}
+
+function toggleCanvasBypass() {
+  setCanvasBypass(!canvasBypassActive);
+  wakeOsd();
+}
+
+function detectOptimalQualityIdx() {
+  if (!autoQualEnabled) return qualityIdx;
+  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  // Wenn während der Fahrt oder über Tailscale-Mobilfunk gestreamt wird:
+  var isRemote = window.location.hostname.indexOf('ts.net') > -1;
+  var dl = (conn && conn.downlink) ? conn.downlink : (isRemote ? 6.0 : 50.0);
+
+  if (currentSpeedKmh > 5 && dl > 8) dl = 7.5; // In Bewegung lieber direkt 1080p/720p statt 40Mbit Direktstream
+  if (dl >= 12 && !isRemote) return 0; // Max
+  if (dl >= 5.5) return 1;             // 1080p (8M)
+  if (dl >= 2.2) return 2;             // 720p (3M)
+  return 3;                            // 480p (1.2M)
+}
+
+function updateQualityButtonLabel() {
+  var btn = document.getElementById('qualBtn');
+  if (!btn) return;
+  var qProf = qualityProfiles[qualityIdx];
+  if (autoQualEnabled) {
+    btn.innerText = '📶 Auto (' + qProf.label.replace('📶 Quali: ', '') + ')';
+    btn.classList.add('active-mode');
+  } else {
+    btn.innerText = qProf.label;
+    btn.classList.toggle('active-mode', qualityIdx > 0);
+  }
+}
+
+// Automatischer Qualitäts-Downgrade, falls das Video im Mobilfunknetz puffert (Stall-Protection)
+document.addEventListener('DOMContentLoaded', function() {
+  var v = document.getElementById('videoEl');
+  if (!v) return;
+  v.addEventListener('waiting', function() {
+    if (!autoQualEnabled || !currentItem) return;
+    var now = Date.now();
+    stallTimestamps = stallTimestamps.filter(function(t){ return now - t < 25000; });
+    stallTimestamps.push(now);
+    // Wenn 2x innerhalb von 25 Sekunden gepuffert wird -> 1 Stufe runter!
+    if (stallTimestamps.length >= 2 && qualityIdx < qualityProfiles.length - 1) {
+      stallTimestamps = [];
+      qualityIdx++;
+      updateQualityButtonLabel();
+      document.getElementById('streamModeBadge').innerText = 'AUTO-DOWNGRADE → ' + qualityProfiles[qualityIdx].badge;
+      startPlayback(currentItem, true, Math.floor(getActualTime()));
+    }
+  });
+});
+
 var qualityIdx = 0;
 var qualityProfiles = [
   { label: '📶 Quali: Max', badge: 'ORIGINAL / MAX', bitrate: 40000000, w: 3840, h: 2160, copyVideo: true },
@@ -1076,13 +1188,16 @@ var qualityProfiles = [
 ];
 
 function cycleQuality() {
-  qualityIdx = (qualityIdx + 1) % qualityProfiles.length;
-  var qProf = qualityProfiles[qualityIdx];
-  var btn = document.getElementById('qualBtn');
-  if (btn) {
-    btn.innerText = qProf.label;
-    btn.classList.toggle('active-mode', qualityIdx > 0);
+  if (autoQualEnabled) {
+    autoQualEnabled = false;
+    qualityIdx = 0;
+  } else if (qualityIdx < qualityProfiles.length - 1) {
+    qualityIdx++;
+  } else {
+    autoQualEnabled = true;
+    qualityIdx = detectOptimalQualityIdx();
   }
+  updateQualityButtonLabel();
   if (currentItem) {
     var needTrans = (qualityIdx > 0) ? true : isTranscoding;
     startPlayback(currentItem, needTrans, Math.floor(getActualTime()));
@@ -1097,6 +1212,10 @@ async function smartStartPlayback(item) {
     v.muted = false;
     v.volume = 1.0;
     try { v.load(); } catch (e) {}
+  }
+  if (autoQualEnabled) {
+    qualityIdx = detectOptimalQualityIdx();
+    updateQualityButtonLabel();
   }
   var needAac = (qualityIdx > 0);
   var fullItem = null;
@@ -1263,6 +1382,7 @@ function closePlayer() {
   const v = document.getElementById('videoEl');
   v.pause(); v.src = '';
   if (hls) { hls.destroy(); hls = null; }
+  setCanvasBypass(false);
   document.getElementById('playerOverlay').style.display = 'none';
   loadHome();
 }
@@ -1277,7 +1397,7 @@ function wakeOsd() {
 }
 
 
-/* ================= TESLA SECRET TOYBOX EASTER EGG (v27.0) ================= */
+/* ================= TESLA SECRET TOYBOX EASTER EGG (v28.0) ================= */
 var tbActive = false, tbMode = 'plaid', tbAnimId = null, tbWarpBoost = false;
 var tbAudioCtx = null, tbOsc = null, tbGain = null, tbNoise = null;
 var tbStars = [], tbParticles = [], tbDrops = [], tbRadarAngle = 0, tbKittPos = 0, tbKittDir = 1, tbIonWave = 0;
