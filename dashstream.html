@@ -282,7 +282,7 @@
     <path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#ffffff"/>
   </svg>
   <div class="boot-word">DASHSTREAM</div>
-  <div class="boot-sub">THEATER OS • v25.0</div>
+  <div class="boot-sub">THEATER OS • v27.0</div>
 </div>
 
 <div id="batteryEdgeWrap">
@@ -307,7 +307,7 @@
 </svg>
     <div class="t-logo" id="teslaLogoTxt">DASH</div>
     <div class="t-sep"></div>
-    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v25.0</span>
+    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v27.0</span>
   </div>
 
   <div class="t-tabs">
@@ -346,7 +346,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <div>
         <div style="font-size:1.2rem;font-weight:800;letter-spacing:1px;">🚗 TESLA LIVE-COCKPIT</div>
-        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v25.0</div>
+        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v27.0</div>
       </div>
       <button class="t-btn" onclick="toggleCockpitModal()">✕</button>
     </div>
@@ -370,8 +370,38 @@
       </div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-      <button class="t-btn blue" style="flex:1;" onclick="setCoPilotState(!secretOverride);updateCockpitUi();" id="cpCoPilotBtn">👑 Beifahrer-Modus (Co-Pilot) umschalten</button>
+      <button class="t-btn blue" style="flex:1;" onclick="setCoPilotState(!secretOverride);updateCockpitUi();" id="cpCoPilotBtn">👑 Co-Pilot</button><button class="t-btn" style="background:#e82127;border-color:#e82127;font-weight:800;" onclick="openToybox('plaid')">🕹️ Secret Toybox</button>
     </div>
+  </div>
+</div>
+
+
+<div id="teslaToyboxOverlay" style="position:fixed;inset:0;background:#030407;z-index:1500;display:none;flex-direction:column;justify-content:space-between;overflow:hidden;font-family:monospace;">
+  <canvas id="toyboxCanvas" style="position:absolute;inset:0;width:100%;height:100%;z-index:1;"></canvas>
+
+  <div style="position:relative;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:20px 28px;background:linear-gradient(180deg,rgba(0,0,0,0.85),transparent);flex-wrap:wrap;gap:10px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="background:#e82127;color:#fff;font-weight:900;padding:5px 10px;border-radius:6px;letter-spacing:2px;font-size:0.8rem;">🕹️ SECRET TOYBOX</span>
+      <span id="tbModeTitle" style="color:#fff;font-weight:800;font-size:1.1rem;letter-spacing:2px;">PLAID HYPERSPACE</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="t-btn" onclick="switchToyMode('plaid')" id="tbBtnPlaid" style="border-color:#e82127;">🚀 Plaid Warp</button>
+      <button class="t-btn" onclick="switchToyMode('cnc')" id="tbBtnCnc">🛰️ C&C Radar</button>
+      <button class="t-btn" onclick="switchToyMode('kitt')" id="tbBtnKitt">🔴 K.I.T.T.</button>
+      <button class="t-btn" onclick="switchToyMode('camp')" id="tbBtnCamp">🔥 Kaminfeuer</button>
+      <button class="t-btn" onclick="toggleRainbowBar()" id="tbBtnRainbow">🌈 Rainbow-Akku</button>
+      <button class="t-btn" style="background:#e82127;border-color:#e82127;" onclick="closeToybox()">✕ Beenden</button>
+    </div>
+  </div>
+
+  <div id="tbCenterHud" style="position:relative;z-index:10;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
+    <div id="tbBigStat" style="font-size:4.2rem;font-weight:900;color:#fff;text-shadow:0 0 30px rgba(232,33,39,0.9);letter-spacing:3px;">WARP READY</div>
+    <div id="tbSubStat" style="font-size:1rem;color:#94a3b8;letter-spacing:3px;margin-top:8px;">BILDSCHIRM GEDRÜCKT HALTEN FÜR LUDICROUS BOOST</div>
+  </div>
+
+  <div style="position:relative;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:20px 28px;background:linear-gradient(0deg,rgba(0,0,0,0.9),transparent);flex-wrap:wrap;gap:12px;">
+    <div id="tbTelemetryBar" style="color:#4ade80;font-size:0.88rem;font-weight:700;letter-spacing:1.5px;">SYS: ONLINE</div>
+    <button class="t-btn blue" id="tbActionBtn" onclick="triggerToyAction()" style="pointer-events:auto;">⚡ BOOST / AKTION AUSLÖSEN</button>
   </div>
 </div>
 
@@ -481,8 +511,17 @@
 <script>
 var API_BASE = window.location.origin;
 var ABS_LOCAL_PORT = "13379";
-var token = localStorage.getItem('jf_token');
-var userId = localStorage.getItem('jf_user');
+function setPersist(k, v) {
+  try { localStorage.setItem(k, v); } catch(e) {}
+  document.cookie = k + "=" + encodeURIComponent(v) + "; max-age=31536000; path=/; SameSite=Lax";
+}
+function getPersist(k) {
+  try { var v = localStorage.getItem(k); if (v) return v; } catch(e) {}
+  var m = document.cookie.match(new RegExp('(?:^|; )' + k + '=([^;]*)'));
+  return m ? decodeURIComponent(m[1]) : null;
+}
+var token = getPersist('jf_token');
+var userId = getPersist('jf_user');
 var allMoviesPool = [];
 var currentItem = null;
 var isTranscoding = false;
@@ -652,7 +691,7 @@ function updateCockpitUi() {
   document.getElementById('cpFr').innerText = (d.tpms_fr || 2.9) + ' bar';
   document.getElementById('cpRl').innerText = (d.tpms_rl || 2.9) + ' bar';
   document.getElementById('cpRr').innerText = (d.tpms_rr || 2.9) + ' bar';
-  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v25.0';
+  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v27.0';
   var cpBtn = document.getElementById('cpCoPilotBtn');
   if (cpBtn) cpBtn.innerText = secretOverride ? '🔒 Co-Pilot aktiv (Tippen zum Sperren)' : '👑 Beifahrer-Modus (Co-Pilot) aktivieren';
 }
@@ -783,6 +822,8 @@ async function api(path, opts = {}, isAuthCall = false) {
 
 async function showLoginScreen() {
   document.getElementById('loginScreen').style.display = 'flex';
+  if (getPersist('jf_saved_u')) document.getElementById('userInp').value = getPersist('jf_saved_u');
+  if (getPersist('jf_saved_p')) { try { document.getElementById('passInp').value = decodeURIComponent(escape(atob(getPersist('jf_saved_p')))); } catch(e){} }
   try {
     const users = await api('/Users/Public', {}, true);
     if (users && users.length > 0) {
@@ -806,7 +847,10 @@ async function doLogin() {
   try {
     const data = await api('/Users/AuthenticateByName', { method: 'POST', body: JSON.stringify({ Username: u, Pw: p }) }, true);
     token = data.AccessToken; userId = data.User.Id;
-    localStorage.setItem('jf_token', token); localStorage.setItem('jf_user', userId);
+    setPersist('jf_token', token);
+    setPersist('jf_user', userId);
+    setPersist('jf_saved_u', u);
+    setPersist('jf_saved_p', btoa(unescape(encodeURIComponent(p))));
     document.getElementById('loginScreen').style.display = 'none';
     loadHome();
   } catch (e) {
@@ -814,8 +858,20 @@ async function doLogin() {
   }
 }
 
-function logout() {
-  localStorage.removeItem('jf_token'); localStorage.removeItem('jf_user');
+async function logout() {
+  var su = getPersist('jf_saved_u'), sp = getPersist('jf_saved_p');
+  if (su && sp !== null) {
+    try {
+      var pw = decodeURIComponent(escape(atob(sp)));
+      var data = await api('/Users/AuthenticateByName', { method: 'POST', body: JSON.stringify({ Username: su, Pw: pw }) }, true);
+      if (data && data.AccessToken) {
+        token = data.AccessToken; userId = data.User.Id;
+        setPersist('jf_token', token); setPersist('jf_user', userId);
+        loadHome();
+        return;
+      }
+    } catch (e) {}
+  }
   showLoginScreen();
 }
 
@@ -851,7 +907,7 @@ async function loadHome() {
     if (latest && latest.length) renderRow('Neu hinzugefügt', latest, 'poster');
     if (movies.Items && movies.Items.length) renderRow('Filme', movies.Items, 'poster');
     if (series.Items && series.Items.length) renderRow('Serien', series.Items, 'poster');
-  } catch (e) { localStorage.clear(); showLoginScreen(); }
+  } catch (e) { console.warn('Netzwerk-Retry...', e); setTimeout(loadHome, 3500); }
 }
 
 function setHero(item) {
@@ -973,6 +1029,11 @@ document.getElementById('teslaAudioEl').addEventListener('timeupdate', () => {
 });
 
 async function searchItems(q) {
+  var cleanQ = (q || '').trim().toLowerCase();
+  if (['plaid', 'warp', 'ludicrous'].indexOf(cleanQ) > -1) { openToybox('plaid'); return; }
+  if (['cnc', 'eva', 'generals', 'matrix'].indexOf(cleanQ) > -1) { openToybox('cnc'); return; }
+  if (['kitt', 'knight', 'turbo'].indexOf(cleanQ) > -1) { openToybox('kitt'); return; }
+  if (['camp', 'kamin', 'feuer'].indexOf(cleanQ) > -1) { openToybox('camp'); return; }
   document.getElementById('absEmbeddedView').style.display = 'none';
   if (q.length < 2) { if (q.length === 0) loadHome(); return; }
   const res = await api('/Users/' + userId + '/Items?SearchTerm=' + encodeURIComponent(q) + '&IncludeItemTypes=Movie,Series,Episode,Audio,AudioBook&Recursive=true&Limit=24');
@@ -1215,7 +1276,284 @@ function wakeOsd() {
   }, 3500);
 }
 
-/* TESLA CAMP-MODE KAMINFEUER */
+
+/* ================= TESLA SECRET TOYBOX EASTER EGG (v27.0) ================= */
+var tbActive = false, tbMode = 'plaid', tbAnimId = null, tbWarpBoost = false;
+var tbAudioCtx = null, tbOsc = null, tbGain = null, tbNoise = null;
+var tbStars = [], tbParticles = [], tbDrops = [], tbRadarAngle = 0, tbKittPos = 0, tbKittDir = 1, tbIonWave = 0;
+var badgeTapCnt = 0, badgeTapTimer = null, rainbowBarActive = false;
+
+function handleBadgeSecretTap() {
+  badgeTapCnt++;
+  clearTimeout(badgeTapTimer);
+  badgeTapTimer = setTimeout(function(){ badgeTapCnt = 0; }, 1200);
+  if (badgeTapCnt >= 3) {
+    badgeTapCnt = 0;
+    openToybox('plaid');
+  }
+}
+
+function toggleRainbowBar() {
+  rainbowBarActive = !rainbowBarActive;
+  var fill = document.getElementById('edgeBatFill');
+  if (fill) {
+    if (rainbowBarActive) {
+      fill.style.background = 'linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00e5ff, #8b00ff, #ff0000)';
+      fill.style.backgroundSize = '200% 100%';
+      fill.style.boxShadow = '0 0 20px rgba(255, 0, 255, 0.95)';
+    } else {
+      fill.style.background = '';
+      fill.style.boxShadow = '';
+    }
+  }
+  playSynthBeep(rainbowBarActive ? 660 : 330, 0.15, 'triangle');
+}
+
+function initTbAudio() {
+  if (!tbAudioCtx) {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) tbAudioCtx = new AC();
+  }
+  if (tbAudioCtx && tbAudioCtx.state === 'suspended') tbAudioCtx.resume();
+}
+
+function playSynthBeep(freq, dur, type) {
+  try {
+    initTbAudio();
+    if (!tbAudioCtx) return;
+    var o = tbAudioCtx.createOscillator(), g = tbAudioCtx.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(freq, tbAudioCtx.currentTime);
+    g.gain.setValueAtTime(0.15, tbAudioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, tbAudioCtx.currentTime + dur);
+    o.connect(g); g.connect(tbAudioCtx.destination);
+    o.start(); o.stop(tbAudioCtx.currentTime + dur);
+  } catch(e){}
+}
+
+function startWarpSound(boost) {
+  try {
+    initTbAudio();
+    if (!tbAudioCtx) return;
+    if (!tbOsc) {
+      tbOsc = tbAudioCtx.createOscillator();
+      tbGain = tbAudioCtx.createGain();
+      tbOsc.type = 'sawtooth';
+      tbOsc.frequency.setValueAtTime(65, tbAudioCtx.currentTime);
+      tbGain.gain.setValueAtTime(0.04, tbAudioCtx.currentTime);
+      tbOsc.connect(tbGain); tbGain.connect(tbAudioCtx.destination);
+      tbOsc.start();
+    }
+    tbOsc.frequency.exponentialRampToValueAtTime(boost ? 290 : 70, tbAudioCtx.currentTime + 0.6);
+    tbGain.gain.linearRampToValueAtTime(boost ? 0.14 : 0.03, tbAudioCtx.currentTime + 0.3);
+  } catch(e){}
+}
+
+function stopTbSound() {
+  try {
+    if (tbOsc) { tbOsc.stop(); tbOsc.disconnect(); tbOsc = null; }
+  } catch(e){}
+}
+
+function openToybox(startMode) {
+  var cModal = document.getElementById('teslaCockpitModal');
+  if (cModal) cModal.style.display = 'none';
+  var ov = document.getElementById('teslaToyboxOverlay');
+  if (!ov) return;
+  ov.style.display = 'flex';
+  tbActive = true;
+  var cv = document.getElementById('toyboxCanvas');
+  cv.width = window.innerWidth;
+  cv.height = window.innerHeight;
+  tbStars = [];
+  for (var i = 0; i < 260; i++) {
+    tbStars.push({ x: (Math.random() - 0.5) * 1600, y: (Math.random() - 0.5) * 1600, z: Math.random() * 1000 });
+  }
+  tbParticles = [];
+  switchToyMode(startMode || 'plaid');
+  if (!tbAnimId) tbLoop();
+}
+
+function closeToybox() {
+  tbActive = false;
+  tbWarpBoost = false;
+  stopTbSound();
+  if (tbAnimId) { cancelAnimationFrame(tbAnimId); tbAnimId = null; }
+  document.getElementById('teslaToyboxOverlay').style.display = 'none';
+}
+
+function switchToyMode(m) {
+  tbMode = m;
+  tbWarpBoost = false;
+  stopTbSound();
+  ['Plaid','Cnc','Kitt','Camp'].forEach(function(k) {
+    var b = document.getElementById('tbBtn' + k);
+    if (b) b.style.borderColor = (k.toLowerCase() === m) ? '#e82127' : 'rgba(255,255,255,0.12)';
+  });
+  var d = window.lastLiveTelemetry || { soc: 80, range_km: 350, inside_temp: 21.0, outside_temp: 15.0, tpms_fl: 2.9 };
+  var title = document.getElementById('tbModeTitle');
+  var big = document.getElementById('tbBigStat');
+  var sub = document.getElementById('tbSubStat');
+  var tel = document.getElementById('tbTelemetryBar');
+  var act = document.getElementById('tbActionBtn');
+
+  if (m === 'plaid') {
+    title.innerText = '🚀 PLAID HYPERSPACE';
+    big.innerText = '1020 PS';
+    sub.innerText = 'BILDSCHIRM HALTEN ODER BUTTON DRÜCKEN FÜR LUDICROUS WARP';
+    tel.innerText = 'BATTERY CORE: ' + (d.soc||80) + '% • RANGE: ' + (d.range_km||350) + ' KM • TRI-MOTOR READY';
+    act.innerText = '🚀 LUDICROUS BOOST';
+    playSynthBeep(520, 0.2, 'sawtooth');
+  } else if (m === 'cnc') {
+    title.innerText = '🛰️ EVA COMMAND & CONQUER RADAR';
+    big.innerText = 'EVA ONLINE';
+    sub.innerText = 'SATELLITE UPLINK: DÜSSELDORF-BILK • UNIT: MODEL Y RWD';
+    tel.innerText = 'REACTOR: ' + (d.soc||80) + '% | HULL TEMP: ' + (d.inside_temp||21) + '°C | TPMS: ' + (d.tpms_fl||2.9) + ' BAR';
+    act.innerText = '⚡ IONENKANONE FEUERN';
+    playSynthBeep(880, 0.12, 'square');
+    setTimeout(function(){ playSynthBeep(1174, 0.2, 'square'); }, 130);
+  } else if (m === 'kitt') {
+    title.innerText = '🔴 KNIGHT INDUSTRIES 2000 (K.I.T.T.)';
+    big.innerText = 'K.I.T.T. AI';
+    sub.innerText = '„ALLE SYSTEME IM GRÜNEN BEREICH, CAPTAIN MISCHA.“';
+    tel.innerText = 'TURBO-ALTERNATOR: ' + (d.soc||80) + '% • SCANNER: ACTIVE • PURSUIT: STANDBY';
+    act.innerText = '🔥 TURBO BOOST';
+    playSynthBeep(392, 0.15, 'sine');
+    setTimeout(function(){ playSynthBeep(784, 0.25, 'sine'); }, 150);
+  } else if (m === 'camp') {
+    title.innerText = '🔥 TESLA CAMP-MODE KAMINFEUER';
+    big.innerText = (d.inside_temp || 21.5) + ' °C';
+    sub.innerText = 'KLIMAANLAGE HÄLTPERFEKTE WOHLFÜHLTEMPERATUR • ROMANCE MODE AKTIV';
+    tel.innerText = 'CAMP-MODE AKTIV • AKKU: ' + (d.soc||80) + '% • AUSSEN: ' + (d.outside_temp||15.0) + '°C';
+    act.innerText = '🪵 HOLZ NACHLEGEN';
+    playSynthBeep(260, 0.3, 'triangle');
+  }
+}
+
+function triggerToyAction() {
+  if (tbMode === 'plaid') {
+    tbWarpBoost = !tbWarpBoost;
+    startWarpSound(tbWarpBoost);
+  } else if (tbMode === 'cnc') {
+    tbIonWave = 10;
+    playSynthBeep(110, 0.7, 'sawtooth');
+  } else if (tbMode === 'kitt') {
+    playSynthBeep(587, 0.12, 'sawtooth');
+    setTimeout(function(){ playSynthBeep(880, 0.35, 'sawtooth'); }, 120);
+    document.getElementById('tbBigStat').innerText = 'SUPER PURSUIT!';
+    setTimeout(function(){ if(tbMode==='kitt') document.getElementById('tbBigStat').innerText = 'K.I.T.T. AI'; }, 2000);
+  } else if (tbMode === 'camp') {
+    for (var i = 0; i < 45; i++) {
+      tbParticles.push({
+        x: window.innerWidth / 2 + (Math.random() - 0.5) * 180,
+        y: window.innerHeight - 60,
+        vx: (Math.random() - 0.5) * 5,
+        vy: -Math.random() * 9 - 3,
+        size: Math.random() * 14 + 4,
+        life: 1.0
+      });
+    }
+    playSynthBeep(180, 0.15, 'triangle');
+  }
+}
+
+function tbLoop() {
+  if (!tbActive) return;
+  var cv = document.getElementById('toyboxCanvas');
+  var ctx = cv.getContext('2d');
+  var w = cv.width, h = cv.height, cx = w / 2, cy = h / 2;
+
+  if (tbMode === 'plaid') {
+    ctx.fillStyle = tbWarpBoost ? 'rgba(5, 6, 12, 0.25)' : 'rgba(5, 6, 12, 0.55)';
+    ctx.fillRect(0, 0, w, h);
+    var spd = tbWarpBoost ? 34 : 6;
+    for (var i = 0; i < tbStars.length; i++) {
+      var s = tbStars[i];
+      var oldZ = s.z;
+      s.z -= spd;
+      if (s.z <= 1) { s.x = (Math.random() - 0.5) * 1600; s.y = (Math.random() - 0.5) * 1600; s.z = 1000; oldZ = 1000; }
+      var sx = cx + (s.x / s.z) * 420, sy = cy + (s.y / s.z) * 420;
+      var ox = cx + (s.x / oldZ) * 420, oy = cy + (s.y / oldZ) * 420;
+      ctx.strokeStyle = tbWarpBoost ? (i % 3 === 0 ? '#e82127' : '#38bdf8') : '#ffffff';
+      ctx.lineWidth = tbWarpBoost ? 2.6 : 1.4;
+      ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(sx, sy); ctx.stroke();
+    }
+    document.getElementById('tbBigStat').innerText = tbWarpBoost ? (280 + Math.floor(Math.random()*42)) + ' KM/H • 1.35G' : 'PLAID CRUISE';
+
+  } else if (tbMode === 'cnc') {
+    ctx.fillStyle = 'rgba(2, 12, 6, 0.22)';
+    ctx.fillRect(0, 0, w, h);
+    var r = Math.min(w, h) * 0.34;
+    ctx.strokeStyle = 'rgba(34, 197, 94, 0.35)';
+    ctx.lineWidth = 2;
+    [0.33, 0.66, 1.0].forEach(function(f) {
+      ctx.beginPath(); ctx.arc(cx, cy, r * f, 0, Math.PI * 2); ctx.stroke();
+    });
+    ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.moveTo(cx, cy - r); ctx.lineTo(cx, cy + r); ctx.stroke();
+    tbRadarAngle += 0.045;
+    ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(tbRadarAngle) * r, cy + Math.sin(tbRadarAngle) * r); ctx.stroke();
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath(); ctx.arc(cx + r * 0.45, cy - r * 0.3, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx - r * 0.5, cy + r * 0.4, 5, 0, Math.PI * 2); ctx.fill();
+    if (tbIonWave > 0) {
+      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.arc(cx, cy, tbIonWave, 0, Math.PI * 2); ctx.stroke();
+      tbIonWave += 24;
+      if (tbIonWave > Math.max(w, h)) tbIonWave = 0;
+    }
+
+  } else if (tbMode === 'kitt') {
+    ctx.fillStyle = 'rgba(5, 0, 0, 0.3)';
+    ctx.fillRect(0, 0, w, h);
+    tbKittPos += 0.035 * tbKittDir;
+    if (tbKittPos > 1 || tbKittPos < -1) tbKittDir *= -1;
+    var barW = Math.min(w * 0.75, 720), startX = cx - barW / 2;
+    for (var b = 0; b < 10; b++) {
+      var bx = startX + (b / 9) * barW;
+      var dist = Math.abs(((b / 9) * 2 - 1) - tbKittPos);
+      var alpha = Math.max(0.08, 1 - dist * 2.2);
+      ctx.fillStyle = 'rgba(232, 33, 39, ' + alpha + ')';
+      ctx.shadowBlur = alpha > 0.5 ? 25 : 0; ctx.shadowColor = '#e82127';
+      ctx.fillRect(bx - 26, cy + 95, 52, 26);
+    }
+    ctx.shadowBlur = 0;
+
+  } else if (tbMode === 'camp') {
+    ctx.fillStyle = 'rgba(8, 4, 2, 0.25)';
+    ctx.fillRect(0, 0, w, h);
+    for (var k = 0; k < 5; k++) {
+      tbParticles.push({
+        x: cx + (Math.random() - 0.5) * 220,
+        y: h - 40,
+        vx: (Math.random() - 0.5) * 2.2,
+        vy: -Math.random() * 5.5 - 2,
+        size: Math.random() * 22 + 8,
+        life: 1.0
+      });
+    }
+    for (var p = tbParticles.length - 1; p >= 0; p--) {
+      var pt = tbParticles[p];
+      pt.x += pt.vx; pt.y += pt.vy; pt.life -= 0.016;
+      if (pt.life <= 0) { tbParticles.splice(p, 1); continue; }
+      var g = Math.floor(pt.life * 190);
+      ctx.fillStyle = 'rgba(255, ' + g + ', 15, ' + pt.life + ')';
+      ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.size * pt.life, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  tbAnimId = requestAnimationFrame(tbLoop);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var cv = document.getElementById('toyboxCanvas');
+  if (cv) {
+    cv.addEventListener('mousedown', function(){ if(tbMode==='plaid'){ tbWarpBoost=true; startWarpSound(true); } else triggerToyAction(); });
+    cv.addEventListener('mouseup', function(){ if(tbMode==='plaid'){ tbWarpBoost=false; startWarpSound(false); } });
+    cv.addEventListener('touchstart', function(){ if(tbMode==='plaid'){ tbWarpBoost=true; startWarpSound(true); } else triggerToyAction(); });
+    cv.addEventListener('touchend', function(){ if(tbMode==='plaid'){ tbWarpBoost=false; startWarpSound(false); } });
+  }
+});
+
 
 (function() {
   var st = document.createElement('style');
@@ -1276,14 +1614,7 @@ document.getElementById('videoEl').addEventListener('touchend', function(ev) {
 });
 
 loadHome();
-setTimeout(function() {
-  var ht = document.getElementById('heroTitle');
-  if (ht && ht.innerText.indexOf('Lade Mediathek') > -1) {
-    localStorage.removeItem('jf_token');
-    localStorage.removeItem('jf_user');
-    showLoginScreen();
-  }
-}, 2200);
+/* 2.2s Auto-Logout-Bug entfernt */
 </script>
 </body>
 </html>
