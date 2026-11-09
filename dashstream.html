@@ -65,7 +65,7 @@
   /* 100% ANIMIERTE LADELEISTE */
   #batteryEdgeWrap {
     position: fixed; top: 0; left: 0; right: 0; z-index: 999;
-    pointer-events: none; transition: opacity 0.4s ease, transform 0.4s var(--spring);
+    pointer-events: auto; transition: opacity 0.4s ease, transform 0.4s var(--spring);
   }
   #batteryEdgeWrap.hidden { opacity: 0; transform: translateY(-10px); }
   .edge-track { width: 100vw; height: 6px; background: rgba(255,255,255,0.1); position: relative; }
@@ -88,7 +88,7 @@
     background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px;
   }
   .edge-info-pill {
-    position: absolute; top: 10px; left: 28px;
+    position: fixed; bottom: 18px; right: 20px; z-index: 999; cursor: pointer; box-shadow: 0 8px 25px rgba(0,0,0,0.75);
     background: rgba(16, 18, 24, 0.9); border: 1px solid rgba(34,197,94,0.4);
     padding: 5px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700;
     color: #e2e8f0; display: flex; align-items: center; gap: 10px;
@@ -282,7 +282,7 @@
     <path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#ffffff"/>
   </svg>
   <div class="boot-word">DASHSTREAM</div>
-  <div class="boot-sub">THEATER OS • v24.0</div>
+  <div class="boot-sub">THEATER OS • v25.0</div>
 </div>
 
 <div id="batteryEdgeWrap">
@@ -291,7 +291,7 @@
     <div class="edge-limit-tick" id="edgeLimitTick" style="left: 80%;"></div>
     <div class="edge-limit-lbl" id="edgeLimitLbl" style="left: 80%;">LIMIT 80%</div>
   </div>
-  <div class="edge-info-pill">
+  <div class="edge-info-pill" onclick="toggleCockpitModal()" title="Tesla Live-Cockpit öffnen">
     <div class="edge-dot"></div>
     <span id="edgeSocTxt">🔋 80% (350 km)</span>
     <span>•</span>
@@ -307,7 +307,7 @@
 </svg>
     <div class="t-logo" id="teslaLogoTxt">DASH</div>
     <div class="t-sep"></div>
-    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v24.0</span>
+    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v25.0</span>
   </div>
 
   <div class="t-tabs">
@@ -338,6 +338,41 @@
     </div>
   </div>
   <iframe id="absIframe" allow="autoplay; fullscreen"></iframe>
+</div>
+
+
+<div id="teslaCockpitModal" onclick="toggleCockpitModal()" style="position:fixed;inset:0;background:rgba(5,6,8,0.85);backdrop-filter:blur(16px);z-index:1200;display:none;align-items:center;justify-content:center;padding:20px;">
+  <div onclick="event.stopPropagation()" style="background:var(--panel);border:1px solid rgba(255,255,255,0.14);border-radius:16px;max-width:520px;width:100%;padding:26px;box-shadow:0 24px 60px rgba(0,0,0,0.85);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <div>
+        <div style="font-size:1.2rem;font-weight:800;letter-spacing:1px;">🚗 TESLA LIVE-COCKPIT</div>
+        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v25.0</div>
+      </div>
+      <button class="t-btn" onclick="toggleCockpitModal()">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px;">
+      <div style="background:var(--bg);padding:14px;border-radius:10px;border:1px solid var(--border);">
+        <div style="font-size:0.75rem;color:var(--muted);">AKKU & REICHWEITE</div>
+        <div id="cpSoc" style="font-size:1.35rem;font-weight:800;margin-top:4px;">80% (350 km)</div>
+      </div>
+      <div style="background:var(--bg);padding:14px;border-radius:10px;border:1px solid var(--border);">
+        <div style="font-size:0.75rem;color:var(--muted);">KLIMA (INNEN / AUSSEN)</div>
+        <div id="cpTemp" style="font-size:1.35rem;font-weight:800;margin-top:4px;">21.0°C / 15.0°C</div>
+      </div>
+    </div>
+    <div style="background:var(--bg);padding:14px;border-radius:10px;border:1px solid var(--border);margin-bottom:16px;">
+      <div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;">REIFENDRUCK (TPMS SENSOREN)</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;font-size:0.92rem;font-weight:700;">
+        <div>🛞 Vorne Links: <span id="cpFl" style="color:#4ade80;">2.9 bar</span></div>
+        <div>🛞 Vorne Rechts: <span id="cpFr" style="color:#4ade80;">2.9 bar</span></div>
+        <div>🛞 Hinten Links: <span id="cpRl" style="color:#4ade80;">2.9 bar</span></div>
+        <div>🛞 Hinten Rechts: <span id="cpRr" style="color:#4ade80;">2.9 bar</span></div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <button class="t-btn blue" style="flex:1;" onclick="setCoPilotState(!secretOverride);updateCockpitUi();" id="cpCoPilotBtn">👑 Beifahrer-Modus (Co-Pilot) umschalten</button>
+    </div>
+  </div>
 </div>
 
 <div id="loginScreen">
@@ -409,6 +444,7 @@
       <div id="osdMetaClock" style="color:var(--muted); font-size:0.86rem; font-weight:600; margin-top:3px;"></div>
     </div>
     <div class="ctrl-group">
+      <button class="btn-ctrl" onclick="switchVideoToAudioDock()" style="border-color:rgba(74,222,128,0.5);color:#4ade80;">🎧 Nur Ton</button>
       <button class="btn-ctrl" id="audioTrackBtn" onclick="cycleAudioTrack()">🌐 Ton: Standard</button>
       <button class="btn-ctrl" id="subTrackBtn" onclick="cycleSubtitles()">💬 UT: Aus</button>
       <button class="btn-ctrl active-mode" id="playerBarBtn" onclick="toggleBatteryBar()">🔋 Ladeleiste</button>
@@ -598,6 +634,40 @@ function toggleBatteryBar() {
   applyBatteryBarState();
 }
 
+
+var lastLiveTelemetry = null;
+function toggleCockpitModal() {
+  var m = document.getElementById('teslaCockpitModal');
+  if (!m) return;
+  m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+  updateCockpitUi();
+}
+function updateCockpitUi() {
+  var d = lastLiveTelemetry || {};
+  var elSoc = document.getElementById('cpSoc');
+  if (!elSoc) return;
+  elSoc.innerText = (d.soc !== undefined ? d.soc : 80) + '% (' + (d.range_km || 350) + ' km)';
+  document.getElementById('cpTemp').innerText = (d.inside_temp || 21.0) + '°C / ' + (d.outside_temp || 15.0) + '°C';
+  document.getElementById('cpFl').innerText = (d.tpms_fl || 2.9) + ' bar';
+  document.getElementById('cpFr').innerText = (d.tpms_fr || 2.9) + ' bar';
+  document.getElementById('cpRl').innerText = (d.tpms_rl || 2.9) + ' bar';
+  document.getElementById('cpRr').innerText = (d.tpms_rr || 2.9) + ' bar';
+  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v25.0';
+  var cpBtn = document.getElementById('cpCoPilotBtn');
+  if (cpBtn) cpBtn.innerText = secretOverride ? '🔒 Co-Pilot aktiv (Tippen zum Sperren)' : '👑 Beifahrer-Modus (Co-Pilot) aktivieren';
+}
+function switchVideoToAudioDock() {
+  if (!currentItem) return;
+  var pos = getActualTime();
+  var itemCopy = currentItem;
+  closePlayer();
+  startAudioDock(itemCopy);
+  setTimeout(function() {
+    var a = document.getElementById('teslaAudioEl');
+    if (a && pos > 2) a.currentTime = pos;
+  }, 600);
+}
+
 async function pollBatteryBar() {
   try {
     let r = await fetch(API_BASE + '/web/tesla_live.json?t=' + Date.now());
@@ -605,6 +675,8 @@ async function pollBatteryBar() {
     if (r.ok) {
       const d = await r.json();
       if (d && d.live) {
+        lastLiveTelemetry = d;
+        updateCockpitUi();
         currentSpeedKmh = d.speed || 0;
         evaluateDriveSafety();
         const soc = Math.max(0, Math.min(100, d.soc || 0));
