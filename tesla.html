@@ -68,7 +68,7 @@
     pointer-events: auto; transition: opacity 0.4s ease, transform 0.4s var(--spring);
   }
   #batteryEdgeWrap.hidden { opacity: 0; transform: translateY(-10px); }
-  .edge-track { width: 100vw; height: 6px; background: rgba(255,255,255,0.1); position: relative; }
+  .edge-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); position: relative; }
   .edge-fill {
     height: 100%; width: 38%;
     background: linear-gradient(90deg, #16a34a 0%, #4ade80 50%, #ffffff 55%, #22c55e 60%, #16a34a 100%);
@@ -85,7 +85,7 @@
   .edge-limit-lbl {
     position: absolute; top: 9px; left: 80%; transform: translateX(-50%);
     font-size: 0.66rem; font-weight: 800; color: #ffffff;
-    background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 4px;
+    background: rgba(0,0,0,0.85); padding: 2px 6px; border-radius: 4px; white-space: nowrap; transition: left 0.5s var(--spring), transform 0.3s;
   }
   .edge-info-pill {
     position: fixed; bottom: 18px; right: 20px; z-index: 999; cursor: pointer; box-shadow: 0 8px 25px rgba(0,0,0,0.75);
@@ -282,14 +282,14 @@
     <path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#ffffff"/>
   </svg>
   <div class="boot-word">DASHSTREAM</div>
-  <div class="boot-sub">THEATER OS • v28.0</div>
+  <div class="boot-sub">THEATER OS • v28.1</div>
 </div>
 
 <div id="batteryEdgeWrap">
   <div class="edge-track">
     <div class="edge-fill" id="edgeBatFill" style="width: 38%;"></div>
     <div class="edge-limit-tick" id="edgeLimitTick" style="left: 80%;"></div>
-    <div class="edge-limit-lbl" id="edgeLimitLbl" style="left: 80%;">LIMIT 80%</div>
+    <div class="edge-limit-lbl" id="edgeLimitLbl" style="left: 80%; white-space: nowrap;">LIMIT 80%</div>
   </div>
   <div class="edge-info-pill" onclick="toggleCockpitModal()" title="Tesla Live-Cockpit öffnen">
     <div class="edge-dot"></div>
@@ -307,7 +307,7 @@
 </svg>
     <div class="t-logo" id="teslaLogoTxt">DASH</div>
     <div class="t-sep"></div>
-    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v28.0</span>
+    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v28.1</span>
   </div>
 
   <div class="t-tabs">
@@ -346,7 +346,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <div>
         <div style="font-size:1.2rem;font-weight:800;letter-spacing:1px;">🚗 TESLA LIVE-COCKPIT</div>
-        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v28.0</div>
+        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v28.1</div>
       </div>
       <button class="t-btn" onclick="toggleCockpitModal()">✕</button>
     </div>
@@ -370,7 +370,7 @@
       </div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-      <button class="t-btn blue" style="flex:1;" onclick="setCoPilotState(!secretOverride);updateCockpitUi();" id="cpCoPilotBtn">👑 Co-Pilot</button><button class="t-btn" style="background:#e82127;border-color:#e82127;font-weight:800;" onclick="openToybox('plaid')">🕹️ Secret Toybox</button>
+      <button class="t-btn blue" style="flex:1;" onclick="setCoPilotState(!secretOverride);updateCockpitUi();" id="cpCoPilotBtn">👑 Co-Pilot</button><button class="t-btn" style="background:#e82127;border-color:#e82127;font-weight:800;" onclick="openToybox('plaid')">🕹️ Toybox</button><button class="t-btn" id="cpSimBtn" onclick="toggleDriveSim()">🏎️ 50 km/h Test-Fahrt</button>
     </div>
   </div>
 </div>
@@ -678,6 +678,21 @@ function toggleBatteryBar() {
 
 
 var lastLiveTelemetry = null;
+
+var simSpeedActive = false;
+function toggleDriveSim() {
+  simSpeedActive = !simSpeedActive;
+  currentSpeedKmh = simSpeedActive ? 50 : 0;
+  if (window.lastLiveTelemetry) window.lastLiveTelemetry.speed = currentSpeedKmh;
+  var btn = document.getElementById('cpSimBtn');
+  if (btn) {
+    btn.innerText = simSpeedActive ? '🛑 Test-Fahrt stoppen (50 km/h aktiv)' : '🏎️ 50 km/h Test-Fahrt';
+    btn.style.background = simSpeedActive ? '#16a34a' : '';
+  }
+  updateCockpitUi();
+  evaluateDriveSafety();
+}
+
 function toggleCockpitModal() {
   var m = document.getElementById('teslaCockpitModal');
   if (!m) return;
@@ -694,7 +709,7 @@ function updateCockpitUi() {
   document.getElementById('cpFr').innerText = (d.tpms_fr || 2.9) + ' bar';
   document.getElementById('cpRl').innerText = (d.tpms_rl || 2.9) + ' bar';
   document.getElementById('cpRr').innerText = (d.tpms_rr || 2.9) + ' bar';
-  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v28.0';
+  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v28.1';
   var cpBtn = document.getElementById('cpCoPilotBtn');
   if (cpBtn) cpBtn.innerText = secretOverride ? '🔒 Co-Pilot aktiv (Tippen zum Sperren)' : '👑 Beifahrer-Modus (Co-Pilot) aktivieren';
 }
@@ -719,14 +734,17 @@ async function pollBatteryBar() {
       if (d && d.live) {
         lastLiveTelemetry = d;
         updateCockpitUi();
-        currentSpeedKmh = d.speed || 0;
+        currentSpeedKmh = simSpeedActive ? 50 : (d.speed || 0);
         evaluateDriveSafety();
         const soc = Math.max(0, Math.min(100, d.soc || 0));
         const limit = Math.max(50, Math.min(100, d.limit_soc || 80));
         document.getElementById('edgeBatFill').style.width = soc + '%';
-        document.getElementById('edgeLimitTick').style.left = limit + '%';
-        document.getElementById('edgeLimitLbl').style.left = limit + '%';
-        document.getElementById('edgeLimitLbl').innerText = 'LIMIT ' + limit + '%';
+        var safeTick = Math.min(99.4, limit);
+        document.getElementById('edgeLimitTick').style.left = safeTick + '%';
+        var lblEl = document.getElementById('edgeLimitLbl');
+        lblEl.style.left = safeTick + '%';
+        lblEl.style.transform = (limit >= 92) ? 'translateX(-100%)' : (limit <= 8 ? 'translateX(0%)' : 'translateX(-50%)');
+        lblEl.innerText = 'LIMIT ' + limit + '%';
         document.getElementById('edgeSocTxt').innerText = '🔋 ' + soc + '% (' + (d.range_km || 0) + ' km)';
         if (d.kw > 0) {
           document.getElementById('edgeTimeTxt').innerText = '⚡ ' + d.kw + ' kW (+' + (d.added_kwh || 0) + ' kWh) • Noch ' + (d.eta_min || 0) + ' Min. bis ' + limit + '%';
@@ -1071,7 +1089,7 @@ function closeModal() { document.getElementById('seriesModal').style.display = '
 
 
 
-/* ================= v28.0: BEIFAHRER-CANVAS-BYPASS & AUTO-QUALITÄT ================= */
+/* ================= v28.1: BEIFAHRER-CANVAS-BYPASS & AUTO-QUALITÄT ================= */
 var canvasBypassActive = false;
 var bypassAnimId = null;
 var autoQualEnabled = true;
@@ -1397,7 +1415,7 @@ function wakeOsd() {
 }
 
 
-/* ================= TESLA SECRET TOYBOX EASTER EGG (v28.0) ================= */
+/* ================= TESLA SECRET TOYBOX EASTER EGG (v28.1) ================= */
 var tbActive = false, tbMode = 'plaid', tbAnimId = null, tbWarpBoost = false;
 var tbAudioCtx = null, tbOsc = null, tbGain = null, tbNoise = null;
 var tbStars = [], tbParticles = [], tbDrops = [], tbRadarAngle = 0, tbKittPos = 0, tbKittDir = 1, tbIonWave = 0;
