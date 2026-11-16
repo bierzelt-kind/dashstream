@@ -1427,7 +1427,13 @@ var tbAudioCtx = null, tbOsc = null, tbGain = null;
 var tbStars = [], tbParticles = [], tbRadarAngle = 0, tbKittPos = 0, tbKittDir = 1, tbIonWave = 0;
 var badgeTapCnt = 0, badgeTapTimer = null, rainbowBarActive = false;
 
-var kittSpeaking = false, kittSpeakTimer = null, kittCachedVoice = null, kittLastSpeakTs = 0;
+/* ================= TESLA SECRET TOYBOX (v30.1 BULLETPROOF) ================= */
+var tbActive = false, tbMode = 'plaid', tbAnimId = null, tbWarpBoost = false;
+var tbAudioCtx = null, tbOsc = null, tbGain = null;
+var tbStars = [], tbParticles = [], tbRadarAngle = 0, tbKittPos = 0, tbKittDir = 1, tbIonWave = 0;
+var badgeTapCnt = 0, badgeTapTimer = null, rainbowBarActive = false;
+
+var kittSpeaking = false, kittSpeakTimer = null, kittLastSpeakTs = 0;
 var kittLastSpeedZone = 'park', kittLastCharge = false, kittLowBatWarned = false, kittSimStep = 0;
 var kittQuotes = [
   "Ein Mann und sein Auto kämpfen gegen das Unrecht. Alle Systeme im grünen Bereich, Mischa.",
@@ -1442,20 +1448,17 @@ function speakKittGerman(customText) {
   var now = Date.now();
   if (now - kittLastSpeakTs < 700 && !customText) return;
   kittLastSpeakTs = now;
-
   var d = window.lastLiveTelemetry || { soc: 80, range_km: 350, inside_temp: 21.0 };
   var pool = kittQuotes.concat([
-    "Meine Batteriekapazität liegt bei " + (d.soc || 80) + " Prozent. Das reicht für " + (d.range_km || 350) + " Kilometer Einsatzfahrt.",
-    "Die Innentemperatur beträgt " + (d.inside_temp || 21) + " Grad. Optimale Bedingungen für unsere nächste Mission."
+    "Meine Batteriekapazität liegt bei " + (d.soc || 80) + " Prozent. Das reicht für " + (d.range_km || 350) + " Kilometer.",
+    "Die Innentemperatur beträgt " + (d.inside_temp || 21) + " Grad. Optimale Bedingungen, Partner."
   ]);
   var phrase = customText || pool[Math.floor(Math.random() * pool.length)];
   var sub = document.getElementById('tbSubStat');
   if (sub) sub.innerText = '„' + phrase.toUpperCase() + '“';
-
   kittSpeaking = true;
   clearTimeout(kittSpeakTimer);
   kittSpeakTimer = setTimeout(function() { kittSpeaking = false; }, Math.max(2400, phrase.length * 68));
-
   setTimeout(function() {
     try {
       if ('speechSynthesis' in window) {
@@ -1473,43 +1476,23 @@ function checkKittLiveReactions() {
   if (!tbActive || tbMode !== 'kitt') return;
   var d = window.lastLiveTelemetry || {};
   var spd = (typeof currentSpeedKmh !== 'undefined' ? currentSpeedKmh : 0) || d.speed || 0;
-  var kw = d.kw || 0;
-  var soc = d.soc !== undefined ? d.soc : 80;
-
-  if (kw > 0 && !kittLastCharge) {
-    kittLastCharge = true;
-    speakKittGerman("Hochspannungs-Energietransfer gestartet. Ich lade mit " + kw + " Kilowatt, Mischa.");
-    return;
-  } else if (kw === 0 && kittLastCharge) {
-    kittLastCharge = false;
-    speakKittGerman("Ladevorgang abgeschlossen. Systeme bereit.");
-    return;
-  }
-  if (soc < 20 && !kittLowBatWarned) {
-    kittLowBatWarned = true;
-    speakKittGerman("Warnung, Mischa! Meine Energiereserven liegen nur noch bei " + soc + " Prozent!");
-    return;
-  }
+  var kw = d.kw || 0, soc = d.soc !== undefined ? d.soc : 80;
+  if (kw > 0 && !kittLastCharge) { kittLastCharge = true; speakKittGerman("Energietransfer gestartet. Ich lade mit " + kw + " Kilowatt."); return; }
+  else if (kw === 0 && kittLastCharge) { kittLastCharge = false; speakKittGerman("Ladevorgang abgeschlossen."); return; }
+  if (soc < 20 && !kittLowBatWarned) { kittLowBatWarned = true; speakKittGerman("Warnung! Energiereserven bei " + soc + " Prozent!"); return; }
   var zone = (spd === 0) ? 'park' : (spd < 65 ? 'normal' : (spd < 115 ? 'fast' : 'pursuit'));
   if (zone !== kittLastSpeedZone) {
-    var prev = kittLastSpeedZone;
-    kittLastSpeedZone = zone;
-    if (zone === 'normal' && prev === 'park') {
-      speakKittGerman("Normal Cruise aktiviert. Wir sind in Bewegung, Mischa.");
-    } else if (zone === 'fast') {
-      speakKittGerman("Wir erreichen " + spd + " Stundenkilometer. Erweiterte Zielerfassung aktiv.");
-    } else if (zone === 'pursuit') {
-      speakKittGerman("Pursuit-Modus aktiviert! " + spd + " Stundenkilometer! Achte auf die Blitzer, Partner!");
-    } else if (zone === 'park') {
-      speakKittGerman("Fahrzeug steht. Auto-Cruise ist wieder eingeschaltet.");
-    }
+    var prev = kittLastSpeedZone; kittLastSpeedZone = zone;
+    if (zone === 'normal' && prev === 'park') speakKittGerman("Normal Cruise aktiviert. Wir rollen, Mischa.");
+    else if (zone === 'fast') speakKittGerman(spd + " Stundenkilometer. Erweiterte Zielerfassung aktiv.");
+    else if (zone === 'pursuit') speakKittGerman("Pursuit-Modus aktiviert! " + spd + " Stundenkilometer! Achte auf die Blitzer, Partner!");
+    else if (zone === 'park') speakKittGerman("Fahrzeug steht. Auto-Cruise ist wieder eingeschaltet.");
   }
 }
 setInterval(checkKittLiveReactions, 1800);
 
 function handleBadgeSecretTap() {
-  badgeTapCnt++;
-  clearTimeout(badgeTapTimer);
+  badgeTapCnt++; clearTimeout(badgeTapTimer);
   badgeTapTimer = setTimeout(function(){ badgeTapCnt = 0; }, 1200);
   if (badgeTapCnt >= 3) { badgeTapCnt = 0; openToybox('plaid'); }
 }
@@ -1526,21 +1509,16 @@ function toggleRainbowBar() {
 
 function initTbAudio() {
   try {
-    if (!tbAudioCtx) {
-      var AC = window.AudioContext || window.webkitAudioContext;
-      if (AC) tbAudioCtx = new AC();
-    }
+    if (!tbAudioCtx) { var AC = window.AudioContext || window.webkitAudioContext; if (AC) tbAudioCtx = new AC(); }
     if (tbAudioCtx && tbAudioCtx.state === 'suspended') tbAudioCtx.resume();
   } catch(e){}
 }
 
 function playSynthBeep(freq, dur, type) {
   try {
-    initTbAudio();
-    if (!tbAudioCtx) return;
+    initTbAudio(); if (!tbAudioCtx) return;
     var o = tbAudioCtx.createOscillator(), g = tbAudioCtx.createGain();
-    o.type = type || 'sine';
-    o.frequency.setValueAtTime(freq, tbAudioCtx.currentTime);
+    o.type = type || 'sine'; o.frequency.setValueAtTime(freq, tbAudioCtx.currentTime);
     g.gain.setValueAtTime(0.12, tbAudioCtx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.001, tbAudioCtx.currentTime + dur);
     o.connect(g); g.connect(tbAudioCtx.destination);
@@ -1550,40 +1528,30 @@ function playSynthBeep(freq, dur, type) {
 
 function startWarpSound(boost) {
   try {
-    initTbAudio();
-    if (!tbAudioCtx) return;
+    initTbAudio(); if (!tbAudioCtx) return;
     if (!tbOsc) {
-      tbOsc = tbAudioCtx.createOscillator();
-      tbGain = tbAudioCtx.createGain();
-      tbOsc.type = 'sawtooth';
-      tbOsc.frequency.setValueAtTime(65, tbAudioCtx.currentTime);
+      tbOsc = tbAudioCtx.createOscillator(); tbGain = tbAudioCtx.createGain();
+      tbOsc.type = 'sawtooth'; tbOsc.frequency.setValueAtTime(65, tbAudioCtx.currentTime);
       tbGain.gain.setValueAtTime(0.04, tbAudioCtx.currentTime);
-      tbOsc.connect(tbGain); tbGain.connect(tbAudioCtx.destination);
-      tbOsc.start();
+      tbOsc.connect(tbGain); tbGain.connect(tbAudioCtx.destination); tbOsc.start();
     }
     tbOsc.frequency.exponentialRampToValueAtTime(boost ? 290 : 70, tbAudioCtx.currentTime + 0.6);
     tbGain.gain.linearRampToValueAtTime(boost ? 0.14 : 0.03, tbAudioCtx.currentTime + 0.3);
   } catch(e){}
 }
 
-function stopTbSound() {
-  try { if (tbOsc) { tbOsc.stop(); tbOsc.disconnect(); tbOsc = null; } } catch(e){}
-}
+function stopTbSound() { try { if (tbOsc) { tbOsc.stop(); tbOsc.disconnect(); tbOsc = null; } } catch(e){} }
 
 function openToybox(startMode) {
   var cModal = document.getElementById('teslaCockpitModal');
   if (cModal) cModal.style.display = 'none';
   var ov = document.getElementById('teslaToyboxOverlay');
   if (!ov) return;
-  ov.style.display = 'flex';
-  tbActive = true;
+  ov.style.display = 'flex'; tbActive = true;
   var cv = document.getElementById('toyboxCanvas');
-  cv.width = window.innerWidth;
-  cv.height = window.innerHeight;
+  cv.width = window.innerWidth; cv.height = window.innerHeight;
   tbStars = [];
-  for (var i = 0; i < 220; i++) {
-    tbStars.push({ x: (Math.random() - 0.5) * 1600, y: (Math.random() - 0.5) * 1600, z: Math.random() * 1000 });
-  }
+  for (var i = 0; i < 200; i++) tbStars.push({ x: (Math.random() - 0.5) * 1600, y: (Math.random() - 0.5) * 1600, z: Math.random() * 1000 });
   tbParticles = [];
   switchToyMode(startMode || 'plaid');
   if (tbAnimId) cancelAnimationFrame(tbAnimId);
@@ -1592,80 +1560,55 @@ function openToybox(startMode) {
 
 function closeToybox() {
   try { if ('speechSynthesis' in window) window.speechSynthesis.cancel(); } catch(e){}
-  kittSpeaking = false;
-  tbActive = false;
-  tbWarpBoost = false;
-  stopTbSound();
+  kittSpeaking = false; tbActive = false; tbWarpBoost = false; stopTbSound();
   if (tbAnimId) { cancelAnimationFrame(tbAnimId); tbAnimId = null; }
   document.getElementById('teslaToyboxOverlay').style.display = 'none';
 }
 
 function switchToyMode(m) {
-  tbMode = m;
-  tbWarpBoost = false;
-  stopTbSound();
+  tbMode = m; tbWarpBoost = false; stopTbSound();
   var cv = document.getElementById('toyboxCanvas');
   if (cv) {
-    cv.width = window.innerWidth;
-    cv.height = window.innerHeight;
-    var ctx = cv.getContext('2d');
-    ctx.fillStyle = '#030407';
-    ctx.fillRect(0, 0, cv.width, cv.height);
+    cv.width = window.innerWidth; cv.height = window.innerHeight;
+    var ctx = cv.getContext('2d'); ctx.fillStyle = '#030407'; ctx.fillRect(0, 0, cv.width, cv.height);
   }
   ['Plaid','Cnc','Kitt','Camp'].forEach(function(k) {
     var b = document.getElementById('tbBtn' + k);
     if (b) b.style.borderColor = (k.toLowerCase() === m) ? '#e82127' : 'rgba(255,255,255,0.12)';
   });
-  var d = window.lastLiveTelemetry || { soc: 80, range_km: 350, inside_temp: 21.0, outside_temp: 15.0, tpms_fl: 2.9 };
-  var title = document.getElementById('tbModeTitle');
-  var big = document.getElementById('tbBigStat');
-  var sub = document.getElementById('tbSubStat');
-  var tel = document.getElementById('tbTelemetryBar');
-  var act = document.getElementById('tbActionBtn');
-
-  // Im K.I.T.T.-Modus blenden wir den großen Text in der Mitte aus, damit das TV-Dashboard freie Sicht hat!
+  var d = window.lastLiveTelemetry || { soc: 80, range_km: 350, inside_temp: 21.0 };
+  var title = document.getElementById('tbModeTitle'), big = document.getElementById('tbBigStat');
+  var sub = document.getElementById('tbSubStat'), tel = document.getElementById('tbTelemetryBar'), act = document.getElementById('tbActionBtn');
   if (big) big.style.display = (m === 'kitt') ? 'none' : 'block';
   var hud = document.getElementById('tbCenterHud');
   if (hud) hud.style.justifyContent = (m === 'kitt') ? 'flex-end' : 'center';
 
   if (m === 'plaid') {
-    title.innerText = '🚀 PLAID HYPERSPACE';
-    big.innerText = '1020 PS';
-    sub.innerText = 'BILDSCHIRM HALTEN ODER BUTTON DRÜCKEN FÜR LUDICROUS WARP';
-    tel.innerText = 'BATTERY CORE: ' + (d.soc||80) + '% • RANGE: ' + (d.range_km||350) + ' KM';
-    act.innerText = '🚀 LUDICROUS BOOST';
-    playSynthBeep(520, 0.2, 'sawtooth');
+    title.innerText = '🚀 PLAID HYPERSPACE'; big.innerText = '1020 PS';
+    sub.innerText = 'BILDSCHIRM HALTEN FÜR LUDICROUS WARP';
+    tel.innerText = 'BATTERY: ' + (d.soc||80) + '% • RANGE: ' + (d.range_km||350) + ' KM';
+    act.innerText = '🚀 LUDICROUS BOOST'; playSynthBeep(520, 0.2, 'sawtooth');
   } else if (m === 'cnc') {
-    title.innerText = '🛰️ EVA COMMAND & CONQUER RADAR';
-    big.innerText = 'EVA ONLINE';
-    sub.innerText = 'SATELLITE UPLINK: DÜSSELDORF-BILK • UNIT: MODEL Y RWD';
-    tel.innerText = 'REACTOR: ' + (d.soc||80) + '% | HULL TEMP: ' + (d.inside_temp||21) + '°C';
-    act.innerText = '⚡ IONENKANONE FEUERN';
-    playSynthBeep(880, 0.12, 'square');
+    title.innerText = '🛰️ EVA COMMAND & CONQUER RADAR'; big.innerText = 'EVA ONLINE';
+    sub.innerText = 'SATELLITE UPLINK: DÜSSELDORF-BILK';
+    tel.innerText = 'REACTOR: ' + (d.soc||80) + '% | TEMP: ' + (d.inside_temp||21) + '°C';
+    act.innerText = '⚡ IONENKANONE FEUERN'; playSynthBeep(880, 0.12, 'square');
   } else if (m === 'kitt') {
     title.innerText = '🔴 KNIGHT INDUSTRIES 2000 (K.I.T.T.)';
     tel.innerText = 'TURBO-ALTERNATOR: ' + (d.soc||80) + '% • SCANNER: ACTIVE • VOICE: DEUTSCH';
     act.innerText = '🔥 FAHRT-STUFEN TESTEN / SPRUCH';
-    playSynthBeep(392, 0.12, 'sine');
-    setTimeout(function(){ speakKittGerman(); }, 180);
+    playSynthBeep(392, 0.12, 'sine'); setTimeout(function(){ speakKittGerman(); }, 180);
   } else if (m === 'camp') {
-    title.innerText = '🔥 TESLA CAMP-MODE KAMINFEUER';
-    big.innerText = (d.inside_temp || 21.5) + ' °C';
-    sub.innerText = 'KLIMAANLAGE HÄLT WOHLFÜHLTEMPERATUR • ROMANCE MODE AKTIV';
-    tel.innerText = 'CAMP-MODE AKTIV • AKKU: ' + (d.soc||80) + '%';
-    act.innerText = '🪵 HOLZ NACHLEGEN';
-    playSynthBeep(260, 0.3, 'triangle');
+    title.innerText = '🔥 TESLA CAMP-MODE KAMINFEUER'; big.innerText = (d.inside_temp || 21.5) + ' °C';
+    sub.innerText = 'ROMANCE MODE AKTIV'; tel.innerText = 'AKKU: ' + (d.soc||80) + '%';
+    act.innerText = '🪵 HOLZ NACHLEGEN'; playSynthBeep(260, 0.3, 'triangle');
   }
 }
 
 function triggerToyAction() {
-  if (tbMode === 'plaid') {
-    tbWarpBoost = !tbWarpBoost;
-    startWarpSound(tbWarpBoost);
-  } else if (tbMode === 'cnc') {
-    tbIonWave = 10;
-    playSynthBeep(110, 0.6, 'sawtooth');
-  } else if (tbMode === 'kitt') {
+  if (tbMode === 'plaid') { tbWarpBoost = !tbWarpBoost; startWarpSound(tbWarpBoost); }
+  else if (tbMode === 'cnc') { tbIonWave = 10; playSynthBeep(110, 0.6, 'sawtooth'); }
+  else if (tbMode === 'kitt') {
     var testSpeeds = [0, 45, 95, 160];
     kittSimStep = (kittSimStep + 1) % testSpeeds.length;
     currentSpeedKmh = testSpeeds[kittSimStep];
@@ -1675,16 +1618,7 @@ function triggerToyAction() {
     checkKittLiveReactions();
     if (currentSpeedKmh === 0) setTimeout(function(){ speakKittGerman(); }, 150);
   } else if (tbMode === 'camp') {
-    for (var i = 0; i < 35; i++) {
-      tbParticles.push({
-        x: window.innerWidth / 2 + (Math.random() - 0.5) * 180,
-        y: window.innerHeight - 60,
-        vx: (Math.random() - 0.5) * 5,
-        vy: -Math.random() * 9 - 3,
-        size: Math.random() * 14 + 4,
-        life: 1.0
-      });
-    }
+    for (var i = 0; i < 30; i++) tbParticles.push({ x: window.innerWidth/2 + (Math.random()-0.5)*160, y: window.innerHeight-60, vx: (Math.random()-0.5)*5, vy: -Math.random()*9-3, size: Math.random()*14+4, life: 1.0 });
     playSynthBeep(180, 0.15, 'triangle');
   }
 }
@@ -1692,16 +1626,11 @@ function triggerToyAction() {
 function drawKittTvDashboard(ctx, w, h, cx, cy) {
   var d = window.lastLiveTelemetry || {};
   var spd = (typeof currentSpeedKmh !== 'undefined' ? currentSpeedKmh : 0) || d.speed || 0;
-  var soc = d.soc !== undefined ? d.soc : 80;
-  var temp = d.inside_temp || 21.0;
-
-  ctx.fillStyle = '#050203';
-  ctx.fillRect(0, 0, w, h);
+  var soc = d.soc !== undefined ? d.soc : 80, temp = d.inside_temp || 21.0;
+  ctx.fillStyle = '#050203'; ctx.fillRect(0, 0, w, h);
 
   var isPortrait = w < 620;
   var topY = isPortrait ? 135 : Math.max(90, cy - 165);
-
-  // 1. STATUS-BOXEN (AUTO CRUISE / NORMAL CRUISE / PURSUIT)
   var modes = [
     { lbl: 'AUTO CRUISE', active: spd === 0, col: '#facc15', bg: 'rgba(250,204,21,0.16)' },
     { lbl: 'NORMAL CRUISE', active: spd > 0 && spd < 80, col: '#22c55e', bg: 'rgba(34,197,94,0.16)' },
@@ -1709,161 +1638,105 @@ function drawKittTvDashboard(ctx, w, h, cx, cy) {
   ];
   ctx.textAlign = 'center';
   if (isPortrait) {
-    var bw = Math.floor((w - 40) / 3);
-    ctx.font = 'bold 11px monospace';
+    var bw = Math.floor((w - 40) / 3); ctx.font = 'bold 11px monospace';
     for (var m = 0; m < 3; m++) {
       var md = modes[m], bx = 14 + m * (bw + 6);
-      ctx.fillStyle = md.active ? md.col : md.bg;
-      ctx.strokeStyle = md.col; ctx.lineWidth = 2;
+      ctx.fillStyle = md.active ? md.col : md.bg; ctx.strokeStyle = md.col; ctx.lineWidth = 2;
       ctx.fillRect(bx, topY, bw, 32); ctx.strokeRect(bx, topY, bw, 32);
-      ctx.fillStyle = md.active ? '#000' : md.col;
-      ctx.fillText(md.lbl, bx + bw / 2, topY + 20);
+      ctx.fillStyle = md.active ? '#000' : md.col; ctx.fillText(md.lbl, bx + bw / 2, topY + 20);
     }
   } else {
-    var boxX = Math.max(24, cx - 330);
-    ctx.font = 'bold 13px monospace';
+    var boxX = Math.max(24, cx - 330); ctx.font = 'bold 13px monospace';
     for (var m2 = 0; m2 < 3; m2++) {
       var md2 = modes[m2], my = topY + m2 * 50;
-      ctx.fillStyle = md2.active ? md2.col : md2.bg;
-      ctx.strokeStyle = md2.col; ctx.lineWidth = 2;
+      ctx.fillStyle = md2.active ? md2.col : md2.bg; ctx.strokeStyle = md2.col; ctx.lineWidth = 2;
       ctx.fillRect(boxX, my, 148, 36); ctx.strokeRect(boxX, my, 148, 36);
-      ctx.fillStyle = md2.active ? '#000' : md2.col;
-      ctx.fillText(md2.lbl, boxX + 74, my + 23);
+      ctx.fillStyle = md2.active ? '#000' : md2.col; ctx.fillText(md2.lbl, boxX + 74, my + 23);
     }
   }
 
-  // 2. MITTE: K.I.T.T. 3-SPALTEN VOICE-MODULATOR + DIGITAL-TACHO
-  var vbY = isPortrait ? (topY + 48) : topY;
-  var vbW = isPortrait ? 175 : 210, vbH = 142;
-  var vbX = isPortrait ? 20 : (cx - vbW / 2);
-
-  ctx.fillStyle = '#09090d';
-  ctx.strokeStyle = '#334155'; ctx.lineWidth = 2;
+  var vbY = isPortrait ? (topY + 46) : topY, vbW = isPortrait ? 170 : 210, vbH = 140;
+  var vbX = isPortrait ? 16 : (cx - vbW / 2);
+  ctx.fillStyle = '#09090d'; ctx.strokeStyle = '#334155'; ctx.lineWidth = 2;
   ctx.fillRect(vbX, vbY, vbW, vbH); ctx.strokeRect(vbX, vbY, vbW, vbH);
 
-  var tNow = Date.now() * 0.02;
-  var modCx = vbX + vbW / 2;
+  var tNow = Date.now() * 0.02, modCx = vbX + vbW / 2;
   for (var col = -1; col <= 1; col++) {
-    var colX = modCx + col * 34 - 11;
-    var maxSeg = col === 0 ? 6 : 4;
-    var wave = Math.abs(Math.sin(tNow + col * 1.4));
-    var activeBars = kittSpeaking ? Math.max(2, Math.floor(wave * (maxSeg + 1))) : 1;
+    var colX = modCx + col * 34 - 11, maxSeg = col === 0 ? 6 : 4;
+    var activeBars = kittSpeaking ? Math.max(2, Math.floor(Math.abs(Math.sin(tNow + col * 1.4)) * (maxSeg + 1))) : 1;
     for (var seg = -6; seg <= 6; seg++) {
       if (Math.abs(seg) > maxSeg) continue;
-      var lit = Math.abs(seg) < activeBars;
-      ctx.fillStyle = lit ? '#ff1e27' : 'rgba(232, 33, 39, 0.15)';
+      ctx.fillStyle = (Math.abs(seg) < activeBars) ? '#ff1e27' : 'rgba(232, 33, 39, 0.15)';
       ctx.fillRect(colX, (vbY + vbH / 2 - 3) + seg * 9, 22, 5);
     }
   }
 
-  // 3. RECHTS: DIGITAL-TACHO & SYSTEM-WERTE
   var rightX = isPortrait ? (vbX + vbW + 12) : Math.min(w - 175, cx + 180);
   var rightW = isPortrait ? (w - rightX - 16) : 155;
-  ctx.fillStyle = 'rgba(232, 33, 39, 0.14)';
-  ctx.strokeStyle = '#e82127';
-  ctx.fillRect(rightX, vbY, rightW, 84); ctx.strokeRect(rightX, vbY, rightW, 84);
-  ctx.fillStyle = '#ef4444';
-  ctx.font = '900 36px monospace';
-  ctx.fillText(spd, rightX + rightW / 2, vbY + 46);
-  ctx.font = 'bold 11px monospace';
-  ctx.fillStyle = '#facc15';
-  ctx.fillText('KM/H • PURSUIT', rightX + rightW / 2, vbY + 70);
+  ctx.fillStyle = 'rgba(232, 33, 39, 0.14)'; ctx.strokeStyle = '#e82127';
+  ctx.fillRect(rightX, vbY, rightW, 82); ctx.strokeRect(rightX, vbY, rightW, 82);
+  ctx.fillStyle = '#ef4444'; ctx.font = '900 34px monospace'; ctx.fillText(spd, rightX + rightW / 2, vbY + 45);
+  ctx.font = 'bold 11px monospace'; ctx.fillStyle = '#facc15'; ctx.fillText('KM/H • DIGITAL', rightX + rightW / 2, vbY + 68);
 
-  ctx.fillStyle = 'rgba(34, 197, 94, 0.12)';
-  ctx.strokeStyle = '#22c55e';
-  ctx.fillRect(rightX, vbY + 94, rightW, 48); ctx.strokeRect(rightX, vbY + 94, rightW, 48);
-  ctx.fillStyle = '#4ade80';
-  ctx.fillText('AKKU ' + soc + '% | ' + temp + '°C', rightX + rightW / 2, vbY + 122);
+  ctx.fillStyle = 'rgba(34, 197, 94, 0.12)'; ctx.strokeStyle = '#22c55e';
+  ctx.fillRect(rightX, vbY + 92, rightW, 48); ctx.strokeRect(rightX, vbY + 92, rightW, 48);
+  ctx.fillStyle = '#4ade80'; ctx.fillText('AKKU ' + soc + '% | ' + temp + '°C', rightX + rightW / 2, vbY + 120);
 
-  // 4. UNTEN: 8-KAMMER KNIGHT RIDER SCANNER
   tbKittPos += (spd >= 80 ? 0.065 : 0.038) * tbKittDir;
   if (tbKittPos > 1) { tbKittPos = 1; tbKittDir = -1; }
   if (tbKittPos < -1) { tbKittPos = -1; tbKittDir = 1; }
 
-  var barW = Math.min(w * 0.82, 640), startX = cx - barW / 2, scanY = vbY + vbH + 26;
-  ctx.fillStyle = '#070709';
-  ctx.strokeStyle = '#27272a';
-  ctx.fillRect(startX - 24, scanY - 6, barW + 48, 36);
-  ctx.strokeRect(startX - 24, scanY - 6, barW + 48, 36);
-
-  var cellW = Math.max(24, Math.floor(barW / 9));
+  var barW = Math.min(w * 0.82, 640), startX = cx - barW / 2, scanY = vbY + vbH + 22;
+  ctx.fillStyle = '#070709'; ctx.strokeStyle = '#27272a';
+  ctx.fillRect(startX - 20, scanY - 6, barW + 40, 34); ctx.strokeRect(startX - 20, scanY - 6, barW + 40, 34);
+  var cellW = Math.max(22, Math.floor(barW / 9));
   for (var b = 0; b < 8; b++) {
-    var bx = startX + (b / 7) * barW;
-    var dist = Math.abs(((b / 7) * 2 - 1) - tbKittPos);
+    var bx = startX + (b / 7) * barW, dist = Math.abs(((b / 7) * 2 - 1) - tbKittPos);
     var alpha = Math.max(0.1, Math.pow(Math.max(0, 1 - dist * 1.55), 2));
     ctx.fillStyle = 'rgba(255, 25, 35, ' + alpha + ')';
-    ctx.fillRect(bx - cellW / 2, scanY, cellW, 24);
-    if (alpha > 0.7) {
-      ctx.fillStyle = 'rgba(255, 220, 220, 0.9)';
-      ctx.fillRect(bx - cellW / 4, scanY + 6, cellW / 2, 12);
-    }
+    ctx.fillRect(bx - cellW / 2, scanY, cellW, 22);
   }
 }
 
 function tbLoop() {
   if (!tbActive) return;
   try {
-    var cv = document.getElementById('toyboxCanvas');
-    var ctx = cv.getContext('2d');
+    var cv = document.getElementById('toyboxCanvas'), ctx = cv.getContext('2d');
     var w = cv.width, h = cv.height, cx = w / 2, cy = h / 2;
-
     if (tbMode === 'plaid') {
-      ctx.fillStyle = tbWarpBoost ? 'rgba(5, 6, 12, 0.25)' : 'rgba(5, 6, 12, 0.55)';
-      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = tbWarpBoost ? 'rgba(5, 6, 12, 0.25)' : 'rgba(5, 6, 12, 0.55)'; ctx.fillRect(0, 0, w, h);
       var spd = tbWarpBoost ? 34 : 6;
       for (var i = 0; i < tbStars.length; i++) {
-        var s = tbStars[i], oldZ = s.z;
-        s.z -= spd;
-        if (s.z <= 1) { s.x = (Math.random() - 0.5) * 1600; s.y = (Math.random() - 0.5) * 1600; s.z = 1000; oldZ = 1000; }
-        var sx = cx + (s.x / s.z) * 420, sy = cy + (s.y / s.z) * 420;
-        var ox = cx + (s.x / oldZ) * 420, oy = cy + (s.y / oldZ) * 420;
+        var s = tbStars[i], oldZ = s.z; s.z -= spd;
+        if (s.z <= 1) { s.x = (Math.random()-0.5)*1600; s.y = (Math.random()-0.5)*1600; s.z = 1000; oldZ = 1000; }
         ctx.strokeStyle = tbWarpBoost ? (i % 3 === 0 ? '#e82127' : '#38bdf8') : '#ffffff';
         ctx.lineWidth = tbWarpBoost ? 2.5 : 1.4;
-        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(sx, sy); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + (s.x/oldZ)*420, cy + (s.y/oldZ)*420); ctx.lineTo(cx + (s.x/s.z)*420, cy + (s.y/s.z)*420); ctx.stroke();
       }
-      document.getElementById('tbBigStat').innerText = tbWarpBoost ? (280 + Math.floor(Math.random()*42)) + ' KM/H • 1.35G' : 'PLAID CRUISE';
-
+      document.getElementById('tbBigStat').innerText = tbWarpBoost ? (280 + Math.floor(Math.random()*42)) + ' KM/H' : 'PLAID CRUISE';
     } else if (tbMode === 'cnc') {
-      ctx.fillStyle = 'rgba(2, 12, 6, 0.25)';
-      ctx.fillRect(0, 0, w, h);
-      var r = Math.min(w, h) * 0.34;
-      ctx.strokeStyle = 'rgba(34, 197, 94, 0.35)'; ctx.lineWidth = 2;
+      ctx.fillStyle = 'rgba(2, 12, 6, 0.25)'; ctx.fillRect(0, 0, w, h);
+      var r = Math.min(w, h) * 0.34; ctx.strokeStyle = 'rgba(34, 197, 94, 0.35)'; ctx.lineWidth = 2;
       [0.33, 0.66, 1.0].forEach(function(f) { ctx.beginPath(); ctx.arc(cx, cy, r * f, 0, Math.PI * 2); ctx.stroke(); });
-      ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.moveTo(cx, cy - r); ctx.lineTo(cx, cy + r); ctx.stroke();
-      tbRadarAngle += 0.045;
-      ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3;
+      tbRadarAngle += 0.045; ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(tbRadarAngle) * r, cy + Math.sin(tbRadarAngle) * r); ctx.stroke();
-      ctx.fillStyle = '#ef4444';
-      ctx.beginPath(); ctx.arc(cx + r * 0.45, cy - r * 0.3, 6, 0, Math.PI * 2); ctx.fill();
-      if (tbIonWave > 0) {
-        ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 6;
-        ctx.beginPath(); ctx.arc(cx, cy, tbIonWave, 0, Math.PI * 2); ctx.stroke();
-        tbIonWave += 24;
-        if (tbIonWave > Math.max(w, h)) tbIonWave = 0;
-      }
-
+      if (tbIonWave > 0) { ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(cx, cy, tbIonWave, 0, Math.PI * 2); ctx.stroke(); tbIonWave += 24; if (tbIonWave > Math.max(w, h)) tbIonWave = 0; }
     } else if (tbMode === 'kitt') {
       drawKittTvDashboard(ctx, w, h, cx, cy);
-
     } else if (tbMode === 'camp') {
-      ctx.fillStyle = 'rgba(8, 4, 2, 0.25)';
-      ctx.fillRect(0, 0, w, h);
-      for (var k = 0; k < 4; k++) {
-        tbParticles.push({ x: cx + (Math.random() - 0.5) * 200, y: h - 40, vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 5 - 2, size: Math.random() * 20 + 8, life: 1.0 });
-      }
+      ctx.fillStyle = 'rgba(8, 4, 2, 0.25)'; ctx.fillRect(0, 0, w, h);
+      for (var k = 0; k < 4; k++) tbParticles.push({ x: cx + (Math.random()-0.5)*200, y: h - 40, vx: (Math.random()-0.5)*2, vy: -Math.random()*5-2, size: Math.random()*20+8, life: 1.0 });
       for (var p = tbParticles.length - 1; p >= 0; p--) {
-        var pt = tbParticles[p];
-        pt.x += pt.vx; pt.y += pt.vy; pt.life -= 0.018;
+        var pt = tbParticles[p]; pt.x += pt.vx; pt.y += pt.vy; pt.life -= 0.018;
         if (pt.life <= 0) { tbParticles.splice(p, 1); continue; }
         ctx.fillStyle = 'rgba(255, ' + Math.floor(pt.life * 190) + ', 15, ' + pt.life + ')';
         ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.size * pt.life, 0, Math.PI * 2); ctx.fill();
       }
     }
-  } catch (err) {
-    console.error("Toybox Render Error:", err);
-  }
+  } catch (err) {}
   tbAnimId = requestAnimationFrame(tbLoop);
 }
+
 
 
 document.addEventListener('DOMContentLoaded', function() {
