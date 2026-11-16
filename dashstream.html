@@ -282,7 +282,7 @@
     <path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#ffffff"/>
   </svg>
   <div class="boot-word">DASHSTREAM</div>
-  <div class="boot-sub">THEATER OS • v29.0</div>
+  <div class="boot-sub">THEATER OS • v29.1</div>
 </div>
 
 <div id="batteryEdgeWrap">
@@ -307,7 +307,7 @@
 </svg>
     <div class="t-logo" id="teslaLogoTxt">DASH</div>
     <div class="t-sep"></div>
-    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v29.0</span>
+    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v29.1</span>
   </div>
 
   <div class="t-tabs">
@@ -346,7 +346,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <div>
         <div style="font-size:1.2rem;font-weight:800;letter-spacing:1px;">🚗 TESLA LIVE-COCKPIT</div>
-        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v29.0</div>
+        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v29.1</div>
       </div>
       <button class="t-btn" onclick="toggleCockpitModal()">✕</button>
     </div>
@@ -711,7 +711,7 @@ function updateCockpitUi() {
   document.getElementById('cpFr').innerText = (d.tpms_fr || 2.9) + ' bar';
   document.getElementById('cpRl').innerText = (d.tpms_rl || 2.9) + ' bar';
   document.getElementById('cpRr').innerText = (d.tpms_rr || 2.9) + ' bar';
-  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v29.0';
+  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v29.1';
   var cpBtn = document.getElementById('cpCoPilotBtn');
   if (cpBtn) cpBtn.innerText = secretOverride ? '🔒 Co-Pilot aktiv (Tippen zum Sperren)' : '👑 Beifahrer-Modus (Co-Pilot) aktivieren';
 }
@@ -1091,7 +1091,7 @@ function closeModal() { document.getElementById('seriesModal').style.display = '
 
 
 
-/* ================= v29.0: BEIFAHRER-CANVAS-BYPASS & AUTO-QUALITÄT ================= */
+/* ================= v29.1: BEIFAHRER-CANVAS-BYPASS & AUTO-QUALITÄT ================= */
 var canvasBypassActive = false;
 var bypassAnimId = null;
 var autoQualEnabled = true;
@@ -1420,7 +1420,7 @@ function wakeOsd() {
 
 
 
-/* ================= v29.0: K.I.T.T. DEUTSCHE SPRACHAUSGABE & VOICE-MODULATOR ================= */
+/* ================= v29.1: K.I.T.T. DEUTSCHE SPRACHAUSGABE & VOICE-MODULATOR ================= */
 var kittSpeaking = false;
 var kittSpeakTimer = null;
 var kittQuotes = [
@@ -1472,7 +1472,7 @@ function speakKittGerman(customText) {
   } catch (e) {}
 }
 
-/* ================= TESLA SECRET TOYBOX EASTER EGG (v29.0) ================= */
+/* ================= TESLA SECRET TOYBOX EASTER EGG (v29.1) ================= */
 var tbActive = false, tbMode = 'plaid', tbAnimId = null, tbWarpBoost = false;
 var tbAudioCtx = null, tbOsc = null, tbGain = null, tbNoise = null;
 var tbStars = [], tbParticles = [], tbDrops = [], tbRadarAngle = 0, tbKittPos = 0, tbKittDir = 1, tbIonWave = 0;
@@ -1613,7 +1613,7 @@ function switchToyMode(m) {
     title.innerText = '🔴 KNIGHT INDUSTRIES 2000 (K.I.T.T.)';
     big.innerText = 'K.I.T.T. AI';
     tel.innerText = 'TURBO-ALTERNATOR: ' + (d.soc||80) + '% • SCANNER: ACTIVE • VOICE: DEUTSCH';
-    act.innerText = '🗣️ K.I.T.T. SPRUCH / TURBO BOOST';
+    act.innerText = '🔥 FAHRT-STUFEN TESTEN / SPRUCH';
     playSynthBeep(392, 0.15, 'sine');
     setTimeout(function(){ playSynthBeep(784, 0.25, 'sine'); speakKittGerman(); }, 180);
   } else if (m === 'camp') {
@@ -1634,10 +1634,7 @@ function triggerToyAction() {
     tbIonWave = 10;
     playSynthBeep(110, 0.7, 'sawtooth');
   } else if (tbMode === 'kitt') {
-    playSynthBeep(587, 0.12, 'sawtooth');
-    setTimeout(function(){ playSynthBeep(880, 0.25, 'sawtooth'); speakKittGerman(); }, 120);
-    document.getElementById('tbBigStat').innerText = 'VOICE ACTIVE';
-    setTimeout(function(){ if(tbMode==='kitt') document.getElementById('tbBigStat').innerText = 'K.I.T.T. AI'; }, 2200);
+    drawKittTvDashboard(ctx, w, h, cx, cy);
   } else if (tbMode === 'camp') {
     for (var i = 0; i < 45; i++) {
       tbParticles.push({
@@ -1700,32 +1697,7 @@ function tbLoop() {
     }
 
   } else if (tbMode === 'kitt') {
-    ctx.fillStyle = 'rgba(5, 0, 0, 0.3)';
-    ctx.fillRect(0, 0, w, h);
-    tbKittPos += 0.035 * tbKittDir;
-    if (tbKittPos > 1 || tbKittPos < -1) tbKittDir *= -1;
-    var barW = Math.min(w * 0.75, 720), startX = cx - barW / 2;
-    for (var b = 0; b < 10; b++) {
-      var bx = startX + (b / 9) * barW;
-      var dist = Math.abs(((b / 9) * 2 - 1) - tbKittPos);
-      var alpha = Math.max(0.08, 1 - dist * 2.2);
-      ctx.fillStyle = 'rgba(232, 33, 39, ' + alpha + ')';
-      ctx.shadowBlur = alpha > 0.5 ? 25 : 0; ctx.shadowColor = '#e82127';
-      ctx.fillRect(bx - 26, cy + 95, 52, 26);
-    }
-    ctx.shadowBlur = 0;
-    // Original 80er K.I.T.T. 3-Balken Voice-Modulator (pulsiert wenn K.I.T.T. spricht!)
-    for (var col = -1; col <= 1; col++) {
-      var colX = cx + col * 46 - 15;
-      var activeBars = kittSpeaking ? (col === 0 ? Math.floor(Math.random() * 7) + 3 : Math.floor(Math.random() * 5) + 1) : 1;
-      for (var seg = 0; seg < 9; seg++) {
-        var distFromCenter = Math.abs(seg - 4);
-        var lit = distFromCenter < activeBars;
-        ctx.fillStyle = lit ? '#e82127' : 'rgba(232, 33, 39, 0.12)';
-        ctx.fillRect(colX, (cy - 135) + seg * 14, 30, 9);
-      }
-    }
-
+    drawKittTvDashboard(ctx, w, h, cx, cy);
   } else if (tbMode === 'camp') {
     ctx.fillStyle = 'rgba(8, 4, 2, 0.25)';
     ctx.fillRect(0, 0, w, h);
