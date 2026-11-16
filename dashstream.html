@@ -282,7 +282,7 @@
     <path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#ffffff"/>
   </svg>
   <div class="boot-word">DASHSTREAM</div>
-  <div class="boot-sub">THEATER OS • v30.1</div>
+  <div class="boot-sub">THEATER OS • v31.0</div>
 </div>
 
 <div id="batteryEdgeWrap">
@@ -307,7 +307,7 @@
 </svg>
     <div class="t-logo" id="teslaLogoTxt">DASH</div>
     <div class="t-sep"></div>
-    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v30.1</span>
+    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v31.0</span>
   </div>
 
   <div class="t-tabs">
@@ -346,7 +346,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <div>
         <div style="font-size:1.2rem;font-weight:800;letter-spacing:1px;">🚗 TESLA LIVE-COCKPIT</div>
-        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v30.1</div>
+        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v31.0</div>
       </div>
       <button class="t-btn" onclick="toggleCockpitModal()">✕</button>
     </div>
@@ -388,7 +388,8 @@
       <button class="t-btn" onclick="switchToyMode('plaid')" id="tbBtnPlaid" style="border-color:#e82127;">🚀 Plaid Warp</button>
       <button class="t-btn" onclick="switchToyMode('cnc')" id="tbBtnCnc">🛰️ C&C Radar</button>
       <button class="t-btn" onclick="switchToyMode('kitt')" id="tbBtnKitt">🔴 K.I.T.T.</button>
-      <button class="t-btn" onclick="switchToyMode('camp')" id="tbBtnCamp">🔥 Kaminfeuer</button>
+      <button class="t-btn" onclick="switchToyMode('camp')" id="tbBtnCamp">🔥 Kamin</button>
+      <button class="t-btn" onclick="switchToyMode('chrono')" id="tbBtnChrono">⚡ Chrono-Spule</button>
       <button class="t-btn" onclick="toggleRainbowBar()" id="tbBtnRainbow">🌈 Rainbow-Akku</button>
       <button class="t-btn" style="background:#e82127;border-color:#e82127;" onclick="closeToybox()">✕ Beenden</button>
     </div>
@@ -702,6 +703,17 @@ function toggleCockpitModal() {
   updateCockpitUi();
 }
 function updateCockpitUi() {
+  var d = window.lastLiveTelemetry || {};
+  var histEl = document.getElementById('cpChargeHistList');
+  if (histEl && d.charge_history && d.charge_history.length) {
+    var activeKwh = d.added_kwh || d.last_added_kwh || 0;
+    var activeEur = (activeKwh * 0.38).toFixed(2).replace('.', ',');
+    var hHtml = '<div style="color:#4ade80;font-weight:700;margin-bottom:6px;">Aktuell / Letzte Ladung: +' + activeKwh + ' kWh (ca. ' + activeEur + ' €)</div>';
+    d.charge_history.forEach(function(ch) {
+      hHtml += '<div style="display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.06);padding:4px 0;"><span>📅 ' + ch.date + ' • ' + ch.loc + '</span><b>+' + ch.kwh + ' kWh (' + ch.eur.toFixed(2).replace('.', ',') + ' €)</b></div>';
+    });
+    histEl.innerHTML = hHtml;
+  }
   var d = lastLiveTelemetry || {};
   var elSoc = document.getElementById('cpSoc');
   if (!elSoc) return;
@@ -711,7 +723,7 @@ function updateCockpitUi() {
   document.getElementById('cpFr').innerText = (d.tpms_fr || 2.9) + ' bar';
   document.getElementById('cpRl').innerText = (d.tpms_rl || 2.9) + ' bar';
   document.getElementById('cpRr').innerText = (d.tpms_rr || 2.9) + ' bar';
-  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v30.1';
+  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v31.0';
   var cpBtn = document.getElementById('cpCoPilotBtn');
   if (cpBtn) cpBtn.innerText = secretOverride ? '🔒 Co-Pilot aktiv (Tippen zum Sperren)' : '👑 Beifahrer-Modus (Co-Pilot) aktivieren';
 }
@@ -1091,7 +1103,7 @@ function closeModal() { document.getElementById('seriesModal').style.display = '
 
 
 
-/* ================= v30.1: BEIFAHRER-CANVAS-BYPASS & AUTO-QUALITÄT ================= */
+/* ================= v31.0: BEIFAHRER-CANVAS-BYPASS & AUTO-QUALITÄT ================= */
 var canvasBypassActive = false;
 var bypassAnimId = null;
 var autoQualEnabled = true;
@@ -1420,14 +1432,14 @@ function wakeOsd() {
 
 
 
-/* ================= v30.1: K.I.T.T. DEUTSCHE SPRACHAUSGABE & VOICE-MODULATOR ================= */
-/* ================= TESLA SECRET TOYBOX (v30.1 BULLETPROOF) ================= */
+/* ================= v31.0: K.I.T.T. DEUTSCHE SPRACHAUSGABE & VOICE-MODULATOR ================= */
+/* ================= TESLA SECRET TOYBOX (v31.0 BULLETPROOF) ================= */
 var tbActive = false, tbMode = 'plaid', tbAnimId = null, tbWarpBoost = false;
 var tbAudioCtx = null, tbOsc = null, tbGain = null;
 var tbStars = [], tbParticles = [], tbRadarAngle = 0, tbKittPos = 0, tbKittDir = 1, tbIonWave = 0;
 var badgeTapCnt = 0, badgeTapTimer = null, rainbowBarActive = false;
 
-/* ================= TESLA SECRET TOYBOX (v30.1 BULLETPROOF) ================= */
+/* ================= TESLA SECRET TOYBOX (v31.0 BULLETPROOF) ================= */
 var tbActive = false, tbMode = 'plaid', tbAnimId = null, tbWarpBoost = false;
 var tbAudioCtx = null, tbOsc = null, tbGain = null;
 var tbStars = [], tbParticles = [], tbRadarAngle = 0, tbKittPos = 0, tbKittDir = 1, tbIonWave = 0;
@@ -1542,6 +1554,50 @@ function startWarpSound(boost) {
 
 function stopTbSound() { try { if (tbOsc) { tbOsc.stop(); tbOsc.disconnect(); tbOsc = null; } } catch(e){} }
 
+
+var chronoDestIdx = 0;
+var chronoCities = [
+  { name: 'MAKADI BAY • ÄGYPTEN', coords: '26.989° N, 33.899° E', dist: '3.480 KM' },
+  { name: 'PEKING • XIAOMI EV PLANT', coords: '39.768° N, 116.516° E', dist: '7.820 KM' },
+  { name: 'KAPSTADT • TAFELBERG', coords: '33.962° S, 18.409° E', dist: '9.540 KM' },
+  { name: 'KUALA LUMPUR • PETRONAS', coords: '3.157° N, 101.711° E', dist: '9.910 KM' },
+  { name: 'DÜSSELDORF-BILK • HQ', coords: '51.209° N, 6.772° E', dist: '0 KM (HOME)' }
+];
+
+function drawChronoTeslaCoil(ctx, w, h, cx, cy) {
+  ctx.fillStyle = 'rgba(2, 6, 18, 0.35)';
+  ctx.fillRect(0, 0, w, h);
+
+  // Pulsierende Chronosphären-Ringe
+  var t = Date.now() * 0.004;
+  for (var r = 1; r <= 4; r++) {
+    var rad = ((t * 45 + r * 65) % 260) + 20;
+    var alpha = Math.max(0.05, 1 - rad / 280);
+    ctx.strokeStyle = (r % 2 === 0) ? 'rgba(56, 189, 248, ' + alpha + ')' : 'rgba(168, 85, 247, ' + alpha + ')';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2); ctx.stroke();
+  }
+
+  // Echte gezackte Tesla-Spulen-Blitze vom Zentrum zu den Rändern
+  for (var b = 0; b < 4; b++) {
+    var angle = (Date.now() * 0.002) + b * (Math.PI / 2) + (Math.random() - 0.5) * 0.5;
+    var tx = cx + Math.cos(angle) * Math.min(w, h) * 0.38;
+    var ty = cy + Math.sin(angle) * Math.min(w, h) * 0.38;
+    ctx.strokeStyle = (b % 2 === 0) ? '#7dd3fc' : '#e0f2fe';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    var curX = cx, curY = cy;
+    for (var s = 1; s <= 7; s++) {
+      var nx = cx + (tx - cx) * (s / 7) + (Math.random() - 0.5) * 38;
+      var ny = cy + (ty - cy) * (s / 7) + (Math.random() - 0.5) * 38;
+      ctx.lineTo(nx, ny);
+      curX = nx; curY = ny;
+    }
+    ctx.stroke();
+  }
+}
+
 function openToybox(startMode) {
   var cModal = document.getElementById('teslaCockpitModal');
   if (cModal) cModal.style.display = 'none';
@@ -1572,7 +1628,7 @@ function switchToyMode(m) {
     cv.width = window.innerWidth; cv.height = window.innerHeight;
     var ctx = cv.getContext('2d'); ctx.fillStyle = '#030407'; ctx.fillRect(0, 0, cv.width, cv.height);
   }
-  ['Plaid','Cnc','Kitt','Camp'].forEach(function(k) {
+  ['Plaid','Cnc','Kitt','Camp','Chrono'].forEach(function(k) {
     var b = document.getElementById('tbBtn' + k);
     if (b) b.style.borderColor = (k.toLowerCase() === m) ? '#e82127' : 'rgba(255,255,255,0.12)';
   });
@@ -1598,6 +1654,15 @@ function switchToyMode(m) {
     tel.innerText = 'TURBO-ALTERNATOR: ' + (d.soc||80) + '% • SCANNER: ACTIVE • VOICE: DEUTSCH';
     act.innerText = '🔥 FAHRT-STUFEN TESTEN / SPRUCH';
     playSynthBeep(392, 0.12, 'sine'); setTimeout(function(){ speakKittGerman(); }, 180);
+  } else if (m === 'chrono') {
+    var ct = chronoCities[chronoDestIdx];
+    title.innerText = '⚡ RED ALERT 2 CHRONOSPHÄRE & TESLA-SPULE';
+    big.innerText = ct.name.split('•')[0].trim();
+    sub.innerText = 'ZIEL-KOORDINATEN: ' + ct.coords + ' • DISTANZ: ' + ct.dist;
+    tel.innerText = 'TESLA COIL CAPACITOR: 2.4 GIGAWATT • CHRONO-SHIFT READY';
+    act.innerText = '⚡ CHRONO-TELEPORT AUSLÖSEN';
+    playSynthBeep(140, 0.25, 'sawtooth');
+    setTimeout(function(){ playSynthBeep(880, 0.35, 'square'); }, 120);
   } else if (m === 'camp') {
     title.innerText = '🔥 TESLA CAMP-MODE KAMINFEUER'; big.innerText = (d.inside_temp || 21.5) + ' °C';
     sub.innerText = 'ROMANCE MODE AKTIV'; tel.innerText = 'AKKU: ' + (d.soc||80) + '%';
@@ -1617,6 +1682,13 @@ function triggerToyAction() {
     playSynthBeep(587, 0.1, 'sawtooth');
     checkKittLiveReactions();
     if (currentSpeedKmh === 0) setTimeout(function(){ speakKittGerman(); }, 150);
+  } else if (tbMode === 'chrono') {
+    chronoDestIdx = (chronoDestIdx + 1) % chronoCities.length;
+    var ct2 = chronoCities[chronoDestIdx];
+    document.getElementById('tbBigStat').innerText = ct2.name.split('•')[0].trim();
+    document.getElementById('tbSubStat').innerText = 'TELEPORT ABGESCHLOSSEN → ' + ct2.name + ' (' + ct2.coords + ')';
+    playSynthBeep(120, 0.15, 'sawtooth');
+    setTimeout(function(){ playSynthBeep(960, 0.4, 'sawtooth'); }, 100);
   } else if (tbMode === 'camp') {
     for (var i = 0; i < 30; i++) tbParticles.push({ x: window.innerWidth/2 + (Math.random()-0.5)*160, y: window.innerHeight-60, vx: (Math.random()-0.5)*5, vy: -Math.random()*9-3, size: Math.random()*14+4, life: 1.0 });
     playSynthBeep(180, 0.15, 'triangle');
@@ -1723,6 +1795,8 @@ function tbLoop() {
       if (tbIonWave > 0) { ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(cx, cy, tbIonWave, 0, Math.PI * 2); ctx.stroke(); tbIonWave += 24; if (tbIonWave > Math.max(w, h)) tbIonWave = 0; }
     } else if (tbMode === 'kitt') {
       drawKittTvDashboard(ctx, w, h, cx, cy);
+    } else if (tbMode === 'chrono') {
+      drawChronoTeslaCoil(ctx, w, h, cx, cy);
     } else if (tbMode === 'camp') {
       ctx.fillStyle = 'rgba(8, 4, 2, 0.25)'; ctx.fillRect(0, 0, w, h);
       for (var k = 0; k < 4; k++) tbParticles.push({ x: cx + (Math.random()-0.5)*200, y: h - 40, vx: (Math.random()-0.5)*2, vy: -Math.random()*5-2, size: Math.random()*20+8, life: 1.0 });
