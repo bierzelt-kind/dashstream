@@ -282,7 +282,7 @@
     <path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#ffffff"/>
   </svg>
   <div class="boot-word">DASHSTREAM</div>
-  <div class="boot-sub">THEATER OS • v34.0</div>
+  <div class="boot-sub">THEATER OS • v35.0</div>
 </div>
 
 <div id="batteryEdgeWrap">
@@ -307,7 +307,7 @@
 </svg>
     <div class="t-logo" id="teslaLogoTxt">DASH</div>
     <div class="t-sep"></div>
-    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v34.0</span>
+    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v35.0</span>
   </div>
 
   <div class="t-tabs">
@@ -346,7 +346,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <div>
         <div style="font-size:1.2rem;font-weight:800;letter-spacing:1px;">🚗 TESLA LIVE-COCKPIT</div>
-        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v34.0</div>
+        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v35.0</div>
       </div>
       <button class="t-btn" onclick="toggleCockpitModal()">✕</button>
     </div>
@@ -483,6 +483,7 @@
       <button class="btn-ctrl" id="zoomBtn" onclick="cycleZoom()">Format: Original</button>
       <button class="btn-ctrl" id="dspBtn" onclick="cycleDsp()">Audio: Studio</button>
       <span id="batForecastBadge" style="font-size:0.78rem;font-weight:800;color:#38bdf8;background:rgba(255,255,255,0.06);padding:7px 11px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);">🔋 Ende: --%</span>
+        <button class="btn-ctrl" onclick="skipIntro85()">⏩ Intro (+85s)</button>
         <button class="btn-ctrl" id="sleepTimerBtn" onclick="cycleSleepTimer()">🌙 Sleep: Aus</button>
         <button class="btn-ctrl" onclick="toggleChildLock()">🔒 Kinder-Schloss</button>
         <button class="btn-ctrl" id="bypassBtn" onclick="toggleCanvasBypass()" style="display:none;">📺 Fahr-Bild: Normal</button>
@@ -728,7 +729,7 @@ function updateCockpitUi() {
   document.getElementById('cpFr').innerText = (d.tpms_fr || 2.9) + ' bar';
   document.getElementById('cpRl').innerText = (d.tpms_rl || 2.9) + ' bar';
   document.getElementById('cpRr').innerText = (d.tpms_rr || 2.9) + ' bar';
-  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v34.0';
+  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v35.0';
   var cpBtn = document.getElementById('cpCoPilotBtn');
   if (cpBtn) cpBtn.innerText = secretOverride ? '🔒 Co-Pilot aktiv (Tippen zum Sperren)' : '👑 Beifahrer-Modus (Co-Pilot) aktivieren';
 }
@@ -1108,7 +1109,7 @@ function closeModal() { document.getElementById('seriesModal').style.display = '
 
 
 
-/* ================= v34.0: BEIFAHRER-CANVAS-BYPASS & AUTO-QUALITÄT ================= */
+/* ================= v35.0: BEIFAHRER-CANVAS-BYPASS & AUTO-QUALITÄT ================= */
 var canvasBypassActive = false;
 var bypassAnimId = null;
 var autoQualEnabled = true;
@@ -1437,9 +1438,9 @@ function wakeOsd() {
 
 
 
-/* ================= v34.0: K.I.T.T. DEUTSCHE SPRACHAUSGABE & VOICE-MODULATOR ================= */
+/* ================= v35.0: K.I.T.T. DEUTSCHE SPRACHAUSGABE & VOICE-MODULATOR ================= */
 
-/* ================= v34.0: TOUCH-LOCK, SLEEP-TIMER & BATTERY-END-FORECAST ================= */
+/* ================= v35.0: TOUCH-LOCK, SLEEP-TIMER & BATTERY-END-FORECAST ================= */
 var childLockActive = false;
 var sleepTimerId = null, sleepMinutesLeft = 0;
 
@@ -1506,14 +1507,14 @@ function updateVideoBatteryForecast() {
 }
 setInterval(updateVideoBatteryForecast, 5000);
 
-/* ================= TESLA SECRET TOYBOX (v34.0 BULLETPROOF) ================= */
+/* ================= TESLA SECRET TOYBOX (v35.0 BULLETPROOF) ================= */
 var tbActive = false, tbMode = 'plaid', tbAnimId = null, tbWarpBoost = false;
 var tbAudioCtx = null, tbOsc = null, tbGain = null;
 var tbStars = [], tbParticles = [], tbRadarAngle = 0, tbKittPos = 0, tbKittDir = 1, tbIonWave = 0;
 var badgeTapCnt = 0, badgeTapTimer = null, rainbowBarActive = false;
 
 
-/* ================= v34.0: TOUCH-LOCK, SLEEP-TIMER & BATTERY-END-FORECAST ================= */
+/* ================= v35.0: TOUCH-LOCK, SLEEP-TIMER & BATTERY-END-FORECAST ================= */
 var childLockActive = false;
 var sleepTimerId = null, sleepMinutesLeft = 0;
 
@@ -1580,7 +1581,7 @@ function updateVideoBatteryForecast() {
 }
 setInterval(updateVideoBatteryForecast, 5000);
 
-/* ================= TESLA SECRET TOYBOX (v34.0 BULLETPROOF) ================= */
+/* ================= TESLA SECRET TOYBOX (v35.0 BULLETPROOF) ================= */
 var tbActive = false, tbMode = 'plaid', tbAnimId = null, tbWarpBoost = false;
 var tbAudioCtx = null, tbOsc = null, tbGain = null;
 var tbStars = [], tbParticles = [], tbRadarAngle = 0, tbKittPos = 0, tbKittDir = 1, tbIonWave = 0;
