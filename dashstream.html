@@ -282,7 +282,7 @@
     <path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#ffffff"/>
   </svg>
   <div class="boot-word">DASHSTREAM</div>
-  <div class="boot-sub">THEATER OS • v31.0</div>
+  <div class="boot-sub">THEATER OS • v33.0</div>
 </div>
 
 <div id="batteryEdgeWrap">
@@ -307,7 +307,7 @@
 </svg>
     <div class="t-logo" id="teslaLogoTxt">DASH</div>
     <div class="t-sep"></div>
-    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v31.0</span>
+    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v33.0</span>
   </div>
 
   <div class="t-tabs">
@@ -346,7 +346,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <div>
         <div style="font-size:1.2rem;font-weight:800;letter-spacing:1px;">🚗 TESLA LIVE-COCKPIT</div>
-        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v31.0</div>
+        <div id="cpStateSub" style="font-size:0.8rem;color:var(--tesla-green);font-weight:700;margin-top:2px;">Status: BEREIT • v33.0</div>
       </div>
       <button class="t-btn" onclick="toggleCockpitModal()">✕</button>
     </div>
@@ -389,7 +389,9 @@
       <button class="t-btn" onclick="switchToyMode('cnc')" id="tbBtnCnc">🛰️ C&C Radar</button>
       <button class="t-btn" onclick="switchToyMode('kitt')" id="tbBtnKitt">🔴 K.I.T.T.</button>
       <button class="t-btn" onclick="switchToyMode('camp')" id="tbBtnCamp">🔥 Kamin</button>
-      <button class="t-btn" onclick="switchToyMode('chrono')" id="tbBtnChrono">⚡ Chrono-Spule</button>
+      <button class="t-btn" onclick="switchToyMode('chrono')" id="tbBtnChrono">⚡ Chrono</button>
+      <button class="t-btn" onclick="switchToyMode('synth')" id="tbBtnSynth">🌆 Synthwave</button>
+      <button class="t-btn" onclick="switchToyMode('romance')" id="tbBtnRomance">💕 Date-Night</button>
       <button class="t-btn" onclick="toggleRainbowBar()" id="tbBtnRainbow">🌈 Rainbow-Akku</button>
       <button class="t-btn" style="background:#e82127;border-color:#e82127;" onclick="closeToybox()">✕ Beenden</button>
     </div>
@@ -723,7 +725,7 @@ function updateCockpitUi() {
   document.getElementById('cpFr').innerText = (d.tpms_fr || 2.9) + ' bar';
   document.getElementById('cpRl').innerText = (d.tpms_rl || 2.9) + ' bar';
   document.getElementById('cpRr').innerText = (d.tpms_rr || 2.9) + ' bar';
-  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v31.0';
+  document.getElementById('cpStateSub').innerText = 'Status: ' + (d.car_state || 'BEREIT') + ' • Speed: ' + (d.speed || 0) + ' km/h • v33.0';
   var cpBtn = document.getElementById('cpCoPilotBtn');
   if (cpBtn) cpBtn.innerText = secretOverride ? '🔒 Co-Pilot aktiv (Tippen zum Sperren)' : '👑 Beifahrer-Modus (Co-Pilot) aktivieren';
 }
@@ -1103,7 +1105,7 @@ function closeModal() { document.getElementById('seriesModal').style.display = '
 
 
 
-/* ================= v31.0: BEIFAHRER-CANVAS-BYPASS & AUTO-QUALITÄT ================= */
+/* ================= v33.0: BEIFAHRER-CANVAS-BYPASS & AUTO-QUALITÄT ================= */
 var canvasBypassActive = false;
 var bypassAnimId = null;
 var autoQualEnabled = true;
@@ -1432,14 +1434,14 @@ function wakeOsd() {
 
 
 
-/* ================= v31.0: K.I.T.T. DEUTSCHE SPRACHAUSGABE & VOICE-MODULATOR ================= */
-/* ================= TESLA SECRET TOYBOX (v31.0 BULLETPROOF) ================= */
+/* ================= v33.0: K.I.T.T. DEUTSCHE SPRACHAUSGABE & VOICE-MODULATOR ================= */
+/* ================= TESLA SECRET TOYBOX (v33.0 BULLETPROOF) ================= */
 var tbActive = false, tbMode = 'plaid', tbAnimId = null, tbWarpBoost = false;
 var tbAudioCtx = null, tbOsc = null, tbGain = null;
 var tbStars = [], tbParticles = [], tbRadarAngle = 0, tbKittPos = 0, tbKittDir = 1, tbIonWave = 0;
 var badgeTapCnt = 0, badgeTapTimer = null, rainbowBarActive = false;
 
-/* ================= TESLA SECRET TOYBOX (v31.0 BULLETPROOF) ================= */
+/* ================= TESLA SECRET TOYBOX (v33.0 BULLETPROOF) ================= */
 var tbActive = false, tbMode = 'plaid', tbAnimId = null, tbWarpBoost = false;
 var tbAudioCtx = null, tbOsc = null, tbGain = null;
 var tbStars = [], tbParticles = [], tbRadarAngle = 0, tbKittPos = 0, tbKittDir = 1, tbIonWave = 0;
@@ -1552,7 +1554,7 @@ function startWarpSound(boost) {
   } catch(e){}
 }
 
-function stopTbSound() { try { if (tbOsc) { tbOsc.stop(); tbOsc.disconnect(); tbOsc = null; } } catch(e){} }
+function stopTbSound() { stopSynthwaveGroove(); try { if (tbOsc) { tbOsc.stop(); tbOsc.disconnect(); tbOsc = null; } } catch(e){} }
 
 
 var chronoDestIdx = 0;
@@ -1598,6 +1600,93 @@ function drawChronoTeslaCoil(ctx, w, h, cx, cy) {
   }
 }
 
+
+var synthBeatTimer = null, synthStep = 0, romanceHearts = [];
+var romanceQuotes = [
+  "Mischa, meine thermischen Sensoren melden akute Überhitzung. Antonia sieht heute Abend einfach atemberaubend aus.",
+  "Romantik-Protokoll aktiviert. Innenraumbeleuchtung gedimmt, Stresslevel auf Null gesenkt.",
+  "Darf ich vorschlagen, das Smartphone jetzt wegzulegen und deiner Frau einen Cocktail zu bestellen, Partner?",
+  "Herzfrequenz-Analyse abgeschlossen: Hundert Prozent Liebe im Cockpit detektiert."
+];
+
+function startSynthwaveGroove(mode) {
+  stopSynthwaveGroove();
+  initTbAudio();
+  if (!tbAudioCtx) return;
+  var notes = (mode === 'romance') ? [65.41, 73.42, 82.41, 73.42] : [110, 110, 220, 130.81, 146.83, 164.81, 130.81, 220];
+  var tempo = (mode === 'romance') ? 550 : 180;
+  synthBeatTimer = setInterval(function() {
+    if (!tbActive || (tbMode !== 'synth' && tbMode !== 'romance')) { stopSynthwaveGroove(); return; }
+    var freq = notes[synthStep % notes.length];
+    synthStep++;
+    playSynthBeep(freq, mode === 'romance' ? 0.45 : 0.14, mode === 'romance' ? 'sine' : 'sawtooth');
+  }, tempo);
+}
+
+function stopSynthwaveGroove() {
+  if (synthBeatTimer) { clearInterval(synthBeatTimer); synthBeatTimer = null; }
+}
+
+function drawSynthwaveGrid(ctx, w, h, cx, cy) {
+  ctx.fillStyle = '#070210';
+  ctx.fillRect(0, 0, w, h);
+  var horizon = cy + 10;
+
+  // Große Retrowave-Sonne mit Streifen
+  var sunGrad = ctx.createLinearGradient(cx, horizon - 150, cx, horizon);
+  sunGrad.addColorStop(0, '#facc15');
+  sunGrad.addColorStop(0.5, '#f97316');
+  sunGrad.addColorStop(1, '#ec4899');
+  ctx.fillStyle = sunGrad;
+  ctx.beginPath(); ctx.arc(cx, horizon - 55, 85, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = '#070210';
+  for (var s = 0; s < 6; s++) {
+    ctx.fillRect(cx - 95, horizon - 45 + s * 12, 190, 3 + s);
+  }
+
+  // Fahrendes 3D-Neon-Grid unter dem Horizont
+  ctx.strokeStyle = '#ec4899';
+  ctx.lineWidth = 1.8;
+  for (var i = -12; i <= 12; i++) {
+    ctx.beginPath();
+    ctx.moveTo(cx + i * 18, horizon);
+    ctx.lineTo(cx + i * 140, h);
+    ctx.stroke();
+  }
+  var offset = (Date.now() * 0.06) % 28;
+  for (var y = 0; y < h - horizon; y += 28) {
+    var py = horizon + y + offset;
+    ctx.strokeStyle = 'rgba(56, 189, 248, ' + Math.min(1, y / 120) + ')';
+    ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(w, py); ctx.stroke();
+  }
+}
+
+function drawRomanceMode(ctx, w, h, cx, cy) {
+  ctx.fillStyle = 'rgba(18, 2, 6, 0.25)';
+  ctx.fillRect(0, 0, w, h);
+
+  if (Math.random() < 0.35) {
+    romanceHearts.push({
+      x: cx + (Math.random() - 0.5) * (w * 0.7),
+      y: h - 30,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: -Math.random() * 3.5 - 1.5,
+      size: Math.random() * 18 + 10,
+      life: 1.0
+    });
+  }
+  ctx.textAlign = 'center';
+  for (var i = romanceHearts.length - 1; i >= 0; i--) {
+    var p = romanceHearts[i];
+    p.x += p.vx; p.y += p.vy; p.life -= 0.01;
+    if (p.life <= 0) { romanceHearts.splice(i, 1); continue; }
+    ctx.font = Math.floor(p.size) + 'px sans-serif';
+    ctx.fillStyle = 'rgba(244, 63, 94, ' + p.life + ')';
+    ctx.fillText(i % 2 === 0 ? '❤️' : '🔥', p.x, p.y);
+  }
+}
+
 function openToybox(startMode) {
   var cModal = document.getElementById('teslaCockpitModal');
   if (cModal) cModal.style.display = 'none';
@@ -1628,7 +1717,7 @@ function switchToyMode(m) {
     cv.width = window.innerWidth; cv.height = window.innerHeight;
     var ctx = cv.getContext('2d'); ctx.fillStyle = '#030407'; ctx.fillRect(0, 0, cv.width, cv.height);
   }
-  ['Plaid','Cnc','Kitt','Camp','Chrono'].forEach(function(k) {
+  ['Plaid','Cnc','Kitt','Camp','Chrono','Synth','Romance'].forEach(function(k) {
     var b = document.getElementById('tbBtn' + k);
     if (b) b.style.borderColor = (k.toLowerCase() === m) ? '#e82127' : 'rgba(255,255,255,0.12)';
   });
@@ -1663,6 +1752,20 @@ function switchToyMode(m) {
     act.innerText = '⚡ CHRONO-TELEPORT AUSLÖSEN';
     playSynthBeep(140, 0.25, 'sawtooth');
     setTimeout(function(){ playSynthBeep(880, 0.35, 'square'); }, 120);
+  } else if (m === 'synth') {
+    title.innerText = '🌆 CYBERPUNK NIGHT-DRIVE SYNTHWAVE';
+    big.innerText = 'OUTRUN 1987';
+    sub.innerText = '110 BPM BASS-ARPEGGIATOR AKTIV • NEON HORIZON';
+    tel.innerText = 'SYNTHESIZER: ONLINE • AUDIO: 80S ANALOG BASS';
+    act.innerText = '🎵 BEAT-BOOST / DROP';
+    startSynthwaveGroove('synth');
+  } else if (m === 'romance') {
+    title.innerText = '💕 DATE-NIGHT ROMANCE & LOVE-O-METER';
+    big.innerText = '100% HOT 🔥';
+    tel.innerText = 'COZY AMBIENCE: ACTIVE • HEARTBEAT: SYNCHRONIZED';
+    act.innerText = '🥂 KOMPLIMENT FÜR ANTONIA';
+    startSynthwaveGroove('romance');
+    speakKittGerman(romanceQuotes[0]);
   } else if (m === 'camp') {
     title.innerText = '🔥 TESLA CAMP-MODE KAMINFEUER'; big.innerText = (d.inside_temp || 21.5) + ' °C';
     sub.innerText = 'ROMANCE MODE AKTIV'; tel.innerText = 'AKKU: ' + (d.soc||80) + '%';
@@ -1689,6 +1792,11 @@ function triggerToyAction() {
     document.getElementById('tbSubStat').innerText = 'TELEPORT ABGESCHLOSSEN → ' + ct2.name + ' (' + ct2.coords + ')';
     playSynthBeep(120, 0.15, 'sawtooth');
     setTimeout(function(){ playSynthBeep(960, 0.4, 'sawtooth'); }, 100);
+  } else if (tbMode === 'synth') {
+    playSynthBeep(440, 0.25, 'sawtooth');
+    setTimeout(function(){ playSynthBeep(880, 0.35, 'sawtooth'); }, 120);
+  } else if (tbMode === 'romance') {
+    speakKittGerman(romanceQuotes[Math.floor(Math.random() * romanceQuotes.length)]);
   } else if (tbMode === 'camp') {
     for (var i = 0; i < 30; i++) tbParticles.push({ x: window.innerWidth/2 + (Math.random()-0.5)*160, y: window.innerHeight-60, vx: (Math.random()-0.5)*5, vy: -Math.random()*9-3, size: Math.random()*14+4, life: 1.0 });
     playSynthBeep(180, 0.15, 'triangle');
@@ -1797,6 +1905,10 @@ function tbLoop() {
       drawKittTvDashboard(ctx, w, h, cx, cy);
     } else if (tbMode === 'chrono') {
       drawChronoTeslaCoil(ctx, w, h, cx, cy);
+    } else if (tbMode === 'synth') {
+      drawSynthwaveGrid(ctx, w, h, cx, cy);
+    } else if (tbMode === 'romance') {
+      drawRomanceMode(ctx, w, h, cx, cy);
     } else if (tbMode === 'camp') {
       ctx.fillStyle = 'rgba(8, 4, 2, 0.25)'; ctx.fillRect(0, 0, w, h);
       for (var k = 0; k < 4; k++) tbParticles.push({ x: cx + (Math.random()-0.5)*200, y: h - 40, vx: (Math.random()-0.5)*2, vy: -Math.random()*5-2, size: Math.random()*20+8, life: 1.0 });
