@@ -9,6 +9,14 @@
 
 ---
 
+## 📸 DashStream im Praxistest (Tesla In-Car UI)
+
+| Login & Mediathek | Live-Cockpit & Reifendruck | Tesla Theater & Ladeleiste |
+| :---: | :---: | :---: |
+| ![Login View](assets/login-view.png) | ![Live Cockpit](assets/live-cockpit.png) | ![Theater View](assets/theater-view.png) |
+
+---
+
 ## 📦 Was ist alles enthalten?
 
 * **`dashstream/dashstream.html`** — Zero-Dependency Single-File Web-UI für Jellyfin & Audiobookshelf im Tesla (mit Live-Akku-Leiste, Lade-Prognose am Film-Ende, Kinder-Touch-Sperre & Secret Toybox).
