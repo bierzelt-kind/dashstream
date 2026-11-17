@@ -36,15 +36,17 @@
 
 ---
 
-## 🚀 Schnell-Installation (1-Klick-Installer)
+## 🚀 Schnell-Installation (2-in-1 Universal-Installer)
 
-Öffne dein Terminal auf dem Server und führe folgende Befehle aus:
+Egal ob du bei **Null anfängst** (nacktes Ubuntu/Raspberry Pi) oder **bereits TeslaMate & Jellyfin nutzt** — der Installer erledigt beides:
 
     git clone https://github.com/bierzelt-kind/dashstream.git
     cd dashstream
     sudo ./install.sh
 
-Der interaktive Assistent fragt automatisch nach deinem TeslaMate-Pfad, kopiert die Oberfläche in deinen Jellyfin-Container und richtet auf Wunsch den Telegram-Bot inklusive Systemd-Service ein.
+**Du kannst im Menü direkt wählen:**
+* **Option [1] Komplett-Neuinstallation (From Scratch):** Installiert automatisch Docker, generiert sichere Passwörter und startet den kompletten Stack (**TeslaMate + PostgreSQL + Grafana + MQTT + Bridge + Jellyfin + Audiobookshelf**) über die mitgelieferte `docker-compose.full.yml`.
+* **Option [2] Bestehendes System (Add-On Modus):** Klinkt nur das DashStream-Frontend, die Live-Bridge und den Telegram-Bot in deine bereits laufenden TeslaMate- und Jellyfin-Container ein.
 
 ---
 

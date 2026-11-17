@@ -2,33 +2,69 @@
 set -e
 
 echo "=================================================================="
-echo "⚡ DashStream & TeslaMate Suite (v37.0) — Interactive Installer"
+echo "⚡ DashStream & TeslaMate Suite (v37.0) — Universal Installer"
 echo "=================================================================="
 echo ""
+echo "Welches Setup möchtest du durchführen?"
+echo "  [1] 🚀 KOMPLETT-NEUINSTALLATION (Docker, TeslaMate, Jellyfin, Audiobookshelf, Bridge & Bot)"
+echo "  [2] 🔌 NUR ANBINDUNG (Ich habe TeslaMate / Jellyfin bereits und will nur DashStream + Bot)"
+echo ""
+read -p "👉 Deine Wahl (1 oder 2) [Standard: 2]: " SETUP_MODE
+SETUP_MODE=${SETUP_MODE:-2}
 
-read -p "👉 1. Pfad zu deinem TeslaMate-Ordner [Standard: $HOME/teslamate]: " TM_DIR
-TM_DIR=${TM_DIR:-$HOME/teslamate}
+if [ "$SETUP_MODE" = "1" ]; then
+    echo ""
+    echo "🛠 [Modus 1] Prüfe Docker & System-Abhängigkeiten..."
+    if ! command -v docker >/dev/null 2>&1; then
+        echo "📦 Installiere Docker & Docker Compose..."
+        curl -fsSL https://get.docker.com | sudo sh
+        sudo usermod -aG docker "$USER" || true
+    fi
 
-read -p "👉 2. Name deines Jellyfin Docker-Containers [Standard: jellyfin]: " JF_CONTAINER
-JF_CONTAINER=${JF_CONTAINER:-jellyfin}
+    read -p "👉 Zielordner für deine neue Server-Installation [Standard: $HOME/teslamate-stack]: " TM_DIR
+    TM_DIR=${TM_DIR:-$HOME/teslamate-stack}
+    mkdir -p "$TM_DIR/tesla-ui" "$TM_DIR/media/movies" "$TM_DIR/media/tv" "$TM_DIR/media/audiobooks" "$TM_DIR/import"
+
+    # Sichere Zufalls-Keys für TeslaMate generieren, falls noch keine .env existiert
+    if [ ! -f "$TM_DIR/.env" ]; then
+        ENC_KEY=$(openssl rand -hex 32)
+        DB_PASS=$(openssl rand -hex 16)
+        echo "TM_ENCRYPTION_KEY=${ENC_KEY}" > "$TM_DIR/.env"
+        echo "TM_DB_PASS=${DB_PASS}" >> "$TM_DIR/.env"
+        chmod 600 "$TM_DIR/.env"
+        echo "🔐 Sichere Datenbank-Passwörter & Verschlüsselungs-Keys in $TM_DIR/.env generiert!"
+    fi
+
+    cp docker-compose.full.yml "$TM_DIR/docker-compose.yml"
+    cp bridge/bridge.py "$TM_DIR/bridge.py"
+    cp dashstream/dashstream.html "$TM_DIR/tesla-ui/dashstream.html"
+
+    echo "🚀 Starte alle Container (TeslaMate, PostgreSQL, Grafana, MQTT, Bridge, Jellyfin & Audiobookshelf)..."
+    (cd "$TM_DIR" && sudo docker compose up -d)
+    echo "⏳ Warte 8 Sekunden, bis Jellyfin initialisiert ist..."
+    sleep 8
+    JF_CONTAINER="jellyfin"
+else
+    echo ""
+    read -p "👉 1. Pfad zu deinem bestehenden TeslaMate-Ordner [Standard: $HOME/teslamate]: " TM_DIR
+    TM_DIR=${TM_DIR:-$HOME/teslamate}
+    read -p "👉 2. Name deines bestehenden Jellyfin-Containers [Standard: jellyfin]: " JF_CONTAINER
+    JF_CONTAINER=${JF_CONTAINER:-jellyfin}
+    mkdir -p "$TM_DIR/tesla-ui"
+    cp bridge/bridge.py "$TM_DIR/bridge.py"
+    cp dashstream/dashstream.html "$TM_DIR/tesla-ui/dashstream.html"
+fi
 
 echo ""
-echo "📦 [1/4] Installiere DashStream Web-Frontend in Jellyfin ($JF_CONTAINER)..."
-mkdir -p "$TM_DIR/tesla-ui"
-cp dashstream/dashstream.html "$TM_DIR/tesla-ui/dashstream.html"
+echo "🎬 Injiziere DashStream Oberfläche in Jellyfin ($JF_CONTAINER)..."
 for dir in "/usr/share/jellyfin/web" "/jellyfin/jellyfin-web"; do
-    docker cp -L "$TM_DIR/tesla-ui/dashstream.html" "$JF_CONTAINER:$dir/tesla.html" 2>/dev/null || true
-    docker cp -L "$TM_DIR/tesla-ui/dashstream.html" "$JF_CONTAINER:$dir/kitt.html" 2>/dev/null || true
+    sudo docker cp -L "$TM_DIR/tesla-ui/dashstream.html" "$JF_CONTAINER:$dir/tesla.html" 2>/dev/null || true
+    sudo docker cp -L "$TM_DIR/tesla-ui/dashstream.html" "$JF_CONTAINER:$dir/kitt.html" 2>/dev/null || true
 done
-echo "✅ DashStream UI erfolgreich in Jellyfin injiziert!"
+echo "✅ DashStream ist live unter http://DEINE-SERVER-IP:8096/web/tesla.html"
 
 echo ""
-echo "📡 [2/4] Richte TeslaMate Telemetry Bridge ein..."
-cp bridge/bridge.py "$TM_DIR/bridge.py"
-echo "✅ bridge.py nach $TM_DIR/bridge.py kopiert."
-
-echo ""
-read -p "🤖 [3/4] Möchtest du den AI Telegram-Bot & GPS/Drain-Wächter installieren? (j/n): " INST_BOT
+read -p "🤖 Möchtest du auch den AI Telegram-Bot & GPS/Drain-Wächter einrichten? (j/n): " INST_BOT
 if [[ "$INST_BOT" =~ ^[JjYy]$ ]]; then
     BOT_DIR="$HOME/telegram-bot"
     mkdir -p "$BOT_DIR"
@@ -36,10 +72,9 @@ if [[ "$INST_BOT" =~ ^[JjYy]$ ]]; then
     cp telegram-bot/requirements.txt "$BOT_DIR/requirements.txt"
 
     if [ ! -f "$BOT_DIR/config.py" ]; then
-        echo ""
         read -p "   🔑 Dein Telegram Bot Token (von @BotFather): " TG_TOKEN
         read -p "   🆔 Deine Telegram Chat-ID (von @userinfobot): " TG_CHATID
-        read -p "   🌐 Deine Tailscale/Jellyfin URL: " TG_JFURL
+        read -p "   🌐 Deine Jellyfin/Tailscale URL: " TG_JFURL
         cat << CFG > "$BOT_DIR/config.py"
 TOKEN = "${TG_TOKEN}"
 MY_CHAT_ID = ${TG_CHATID:-0}
@@ -70,12 +105,18 @@ WantedBy=multi-user.target
 SVC"
     sudo systemctl daemon-reload
     sudo systemctl enable --now telegram-bot.service
-    echo "✅ Telegram-Bot als Systemdienst gestartet!"
+    echo "✅ Telegram-Bot läuft im Hintergrund!"
 fi
 
-echo ""
-echo "💾 [4/4] Richte automatisches Backup-Skript ein..."
 cp scripts/backup_all.sh "$HOME/backup_all.sh"
 chmod +x "$HOME/backup_all.sh"
 mkdir -p "$HOME/backups"
-echo "✅ Fertig! Dein System läuft jetzt auf v37.0!"
+
+echo ""
+echo "=================================================================="
+echo "🎉 INSTALLATION ABGESCHLOSSEN!"
+echo "👉 TeslaMate Login:     http://DEINE-SERVER-IP:4000"
+echo "👉 Grafana Dashboards:  http://DEINE-SERVER-IP:3000"
+echo "👉 DashStream (Tesla):  http://DEINE-SERVER-IP:8096/web/tesla.html"
+echo "👉 Audiobookshelf:      http://DEINE-SERVER-IP:13378"
+echo "=================================================================="

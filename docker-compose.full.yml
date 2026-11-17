@@ -1,0 +1,81 @@
+services:
+  teslamate:
+    image: teslamate/teslamate:latest
+    restart: always
+    environment:
+      - ENCRYPTION_KEY=${TM_ENCRYPTION_KEY}
+      - DATABASE_USER=teslamate
+      - DATABASE_PASS=${TM_DB_PASS}
+      - DATABASE_NAME=teslamate
+      - DATABASE_HOST=database
+      - MQTT_HOST=mosquitto
+    ports:
+      - 4000:4000
+    volumes:
+      - ./import:/opt/app/import
+
+  database:
+    image: postgres:16
+    restart: always
+    environment:
+      - POSTGRES_USER=teslamate
+      - POSTGRES_PASSWORD=${TM_DB_PASS}
+      - POSTGRES_DB=teslamate
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+
+  grafana:
+    image: teslamate/grafana:latest
+    restart: always
+    environment:
+      - DATABASE_USER=teslamate
+      - DATABASE_PASS=${TM_DB_PASS}
+      - DATABASE_NAME=teslamate
+      - DATABASE_HOST=database
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana-data:/var/lib/grafana
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    restart: always
+    command: mosquitto -c /mosquitto-no-auth.conf
+    ports:
+      - 1883:1883
+
+  teslamate-bridge:
+    image: python:3.11-slim
+    container_name: teslamate-teslamate-bridge-1
+    restart: always
+    depends_on:
+      - database
+      - mosquitto
+    volumes:
+      - ./bridge.py:/app/bridge.py
+      - /dev/shm:/dev/shm
+    command: sh -c "pip install paho-mqtt psycopg2-binary --quiet && python3 -u /app/bridge.py"
+
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    restart: always
+    ports:
+      - 8096:8096
+    volumes:
+      - ./jellyfin-config:/config
+      - ./jellyfin-cache:/cache
+      - ./media:/media
+      - /dev/shm:/dev/shm:ro
+
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    restart: always
+    ports:
+      - 13378:80
+    volumes:
+      - ./media/audiobooks:/audiobooks
+      - ./media/podcasts:/podcasts
+      - ./abs-config:/config
+      - ./abs-metadata:/metadata
