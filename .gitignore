@@ -1,0 +1,6 @@
+config.py
+*.pyc
+__pycache__/
+venv/
+*.tar.gz
+*.sql

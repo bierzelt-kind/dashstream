@@ -1,0 +1,3 @@
+FROM alpine:latest
+RUN apk add --no-cache python3 py3-paho-mqtt py3-psycopg2 docker-cli
+CMD ["python3", "/bridge.py"]

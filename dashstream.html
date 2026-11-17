@@ -281,7 +281,7 @@
     <rect x="2" y="2" width="20" height="20" rx="6" fill="rgba(232,33,39,0.2)" stroke="#e82127" stroke-width="2"/>
     <path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#ffffff"/>
   </svg>
-  <div class="boot-word">DASHSTREAM</div>
+  <div class="boot-word">TESLA</div>
   <div class="boot-sub">THEATER OS • v35.0</div>
 </div>
 
@@ -293,7 +293,7 @@
   </div>
   <div class="edge-info-pill" onclick="toggleCockpitModal()" title="Tesla Live-Cockpit öffnen">
     <div class="edge-dot"></div>
-    <span id="edgeSocTxt">🔋 80% (350 km)</span>
+    <span id="edgeSocTxt">🔋 Lade Live-Daten...</span>
     <span>•</span>
     <span id="edgeTimeTxt">⚡ TeslaMate aktiv</span>
   </div>
@@ -305,9 +305,9 @@
   <rect x="2" y="2" width="20" height="20" rx="6" fill="rgba(232,33,39,0.15)" stroke="var(--tesla-red)" stroke-width="2"/>
   <path d="M9.5 7.5L16.5 12L9.5 16.5V7.5Z" fill="#ffffff"/>
 </svg>
-    <div class="t-logo" id="teslaLogoTxt">DASH</div>
+    <div class="t-logo" id="teslaLogoTxt">TESLA</div>
     <div class="t-sep"></div>
-    <div class="t-sub" id="teslaSubTxt">STREAM</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v35.0</span>
+    <div class="t-sub" id="teslaSubTxt">THEATER</div><span id="verBadge" onclick="event.stopPropagation();handleBadgeSecretTap()" title="3x tippen für Secret Toybox" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);color:#94a3b8;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:1px;">v35.0</span>
   </div>
 
   <div class="t-tabs">
@@ -595,7 +595,7 @@ function setCoPilotState(active) {
   secretOverride = Boolean(active);
   localStorage.setItem('tesla_copilot', secretOverride ? '1' : '0');
   document.getElementById('teslaLogoTxt').classList.toggle('override-on', secretOverride);
-  document.getElementById('teslaSubTxt').innerText = secretOverride ? 'CO-PILOT AKTIV' : 'STREAM';
+  document.getElementById('teslaSubTxt').innerText = secretOverride ? 'CO-PILOT AKTIV' : 'THEATER';
   var bpBtn = document.getElementById('bypassBtn');
   if (bpBtn) bpBtn.style.display = secretOverride ? 'inline-flex' : 'none';
   if (!secretOverride) setCanvasBypass(false);
@@ -633,7 +633,7 @@ if ('mediaSession' in navigator) {
     if (secretOverride) {
       secretOverride = false;
       document.getElementById('teslaLogoTxt').classList.remove('override-on');
-      document.getElementById('teslaSubTxt').innerText = 'STREAM';
+      document.getElementById('teslaSubTxt').innerText = 'THEATER';
       closePlayer();
     } else {
       togglePlay();
