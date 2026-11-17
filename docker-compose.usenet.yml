@@ -1,0 +1,66 @@
+services:
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    restart: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    ports:
+      - 8080:8080
+    volumes:
+      - ./arr-configs/sabnzbd:/config
+      - ./data/usenet:/data/usenet
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    ports:
+      - 9696:9696
+    volumes:
+      - ./arr-configs/prowlarr:/config
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    ports:
+      - 7878:7878
+    volumes:
+      - ./arr-configs/radarr:/config
+      - ./data:/data
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    ports:
+      - 8989:8989
+    volumes:
+      - ./arr-configs/sonarr:/config
+      - ./data:/data
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    restart: always
+    environment:
+      - TZ=Europe/Berlin
+    ports:
+      - 5055:5055
+    volumes:
+      - ./arr-configs/jellyseerr:/app/config

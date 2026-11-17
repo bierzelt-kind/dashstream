@@ -1,6 +1,8 @@
 services:
+  # ================= TESLAMATE & TELEMETRY STACK =================
   teslamate:
     image: teslamate/teslamate:latest
+    container_name: teslamate
     restart: always
     environment:
       - ENCRYPTION_KEY=${TM_ENCRYPTION_KEY}
@@ -16,6 +18,7 @@ services:
 
   database:
     image: postgres:16
+    container_name: teslamate-database-1
     restart: always
     environment:
       - POSTGRES_USER=teslamate
@@ -26,6 +29,7 @@ services:
 
   grafana:
     image: teslamate/grafana:latest
+    container_name: teslamate-grafana-1
     restart: always
     environment:
       - DATABASE_USER=teslamate
@@ -39,6 +43,7 @@ services:
 
   mosquitto:
     image: eclipse-mosquitto:2
+    container_name: teslamate-mosquitto-1
     restart: always
     command: mosquitto -c /mosquitto-no-auth.conf
     ports:
@@ -56,6 +61,7 @@ services:
       - /dev/shm:/dev/shm
     command: sh -c "pip install paho-mqtt psycopg2-binary --quiet && python3 -u /app/bridge.py"
 
+  # ================= STREAMING STACK (JELLYFIN & ABS) =================
   jellyfin:
     image: jellyfin/jellyfin:latest
     container_name: jellyfin
@@ -65,7 +71,7 @@ services:
     volumes:
       - ./jellyfin-config:/config
       - ./jellyfin-cache:/cache
-      - ./media:/media
+      - ./data/media:/media
       - /dev/shm:/dev/shm:ro
 
   audiobookshelf:
@@ -75,7 +81,74 @@ services:
     ports:
       - 13378:80
     volumes:
-      - ./media/audiobooks:/audiobooks
-      - ./media/podcasts:/podcasts
+      - ./data/media/audiobooks:/audiobooks
+      - ./data/media/podcasts:/podcasts
       - ./abs-config:/config
       - ./abs-metadata:/metadata
+
+  # ================= USENET & *ARR AUTOMATION STACK =================
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    restart: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    ports:
+      - 8080:8080
+    volumes:
+      - ./arr-configs/sabnzbd:/config
+      - ./data/usenet:/data/usenet
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    ports:
+      - 9696:9696
+    volumes:
+      - ./arr-configs/prowlarr:/config
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    ports:
+      - 7878:7878
+    volumes:
+      - ./arr-configs/radarr:/config
+      - ./data:/data
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    ports:
+      - 8989:8989
+    volumes:
+      - ./arr-configs/sonarr:/config
+      - ./data:/data
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    restart: always
+    environment:
+      - TZ=Europe/Berlin
+    ports:
+      - 5055:5055
+    volumes:
+      - ./arr-configs/jellyseerr:/app/config
